@@ -333,9 +333,19 @@ body {
   padding: 32px;
 }
 
-/* Narrow screens: stack. V1 is desktop-first but should not break. --------- */
+/* Preview toggle button — only visible on narrow screens ------------------- */
+
+.preview-toggle {
+  display: none;
+}
+
+/* Narrow screens: stack + toggle between editor and preview. --------------- */
 
 @media (max-width: 900px) {
+  .preview-toggle {
+    display: inline-flex;
+  }
+
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
@@ -360,6 +370,21 @@ body {
   .preview {
     height: auto;
     aspect-ratio: 8.5 / 11;
+  }
+
+  /* When showing preview on mobile: collapse the form + footer, full-width stage */
+  .app--show-preview .form,
+  .app--show-preview .editor__footer {
+    display: none;
+  }
+
+  .app--show-preview .editor {
+    border-bottom: 0;
+  }
+
+  /* When showing editor on mobile: hide the stage entirely */
+  .app--show-editor .stage {
+    display: none;
   }
 }
 

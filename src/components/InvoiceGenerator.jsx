@@ -14,6 +14,7 @@ export default function InvoiceGenerator({ exportPdf }) {
   const [invoice, setInvoice] = useState(
     () => loadDraft() ?? createInvoice({ invoiceNumber: DEFAULT_INVOICE_NUMBER })
   );
+  const [mobileView, setMobileView] = useState("editor"); // "editor" | "preview"
 
   useEffect(() => {
     saveDraft(invoice);
@@ -41,17 +42,28 @@ export default function InvoiceGenerator({ exportPdf }) {
     setInvoice(createInvoice({ invoiceNumber: nextInvoiceNumber(invoice.invoiceNumber) }));
   };
 
+  const appClass = `app ${mobileView === "preview" ? "app--show-preview" : "app--show-editor"}`;
+
   return (
-    <div className="app">
+    <div className={appClass}>
       <aside className="editor">
         <header className="editor__header">
           <div>
             <h1 className="editor__title">Invoice</h1>
             <p className="editor__subtitle">Changes save automatically in this browser.</p>
           </div>
-          <button type="button" className="btn btn--ghost" onClick={startNewInvoice}>
-            New invoice
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              className="btn btn--ghost preview-toggle"
+              onClick={() => setMobileView((v) => (v === "editor" ? "preview" : "editor"))}
+            >
+              {mobileView === "editor" ? "Preview" : "← Edit"}
+            </button>
+            <button type="button" className="btn btn--ghost" onClick={startNewInvoice}>
+              New invoice
+            </button>
+          </div>
         </header>
 
         <InvoiceForm
