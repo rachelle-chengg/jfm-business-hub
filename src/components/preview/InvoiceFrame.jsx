@@ -10,14 +10,25 @@ export default function InvoiceFrame() {
       </svg>
       <footer className="sheet__footer">
         <span className="sheet__footer-name">{BUSINESS.shortName}</span>
-        <span className="sheet__footer-item">
+        <a href={`tel:${BUSINESS.phone.replace(/\D/g, "")}`} className="sheet__footer-item sheet__footer-link">
           <PhoneIcon />
           {BUSINESS.phone}
-        </span>
-        <span className="sheet__footer-item">
+        </a>
+        <a href={`mailto:${BUSINESS.email}`} className="sheet__footer-item sheet__footer-link">
           <MailIcon />
           {BUSINESS.email}
-        </span>
+        </a>
+        {BUSINESS.website && (
+          <a
+            href={`https://${BUSINESS.website}`}
+            className="sheet__footer-item sheet__footer-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <GlobeIcon />
+            {BUSINESS.website}
+          </a>
+        )}
       </footer>
     </>
   );
@@ -42,6 +53,15 @@ function MailIcon() {
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <rect x="3" y="5.5" width="18" height="13" rx="1" fill="none" stroke="currentColor" strokeWidth="1.6" />
       <path d="M3.5 6.5l8.5 6.5 8.5-6.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function GlobeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
     </svg>
   );
 }

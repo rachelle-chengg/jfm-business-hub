@@ -9,7 +9,9 @@
  * fall back to the consent popup when we need to.
  */
 
-const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+const DRIVE_SCOPE =
+  "https://www.googleapis.com/auth/drive.file " +
+  "https://www.googleapis.com/auth/spreadsheets";
 
 let _tokenClient = null;
 let _token = null;         // { access_token, expires_at }

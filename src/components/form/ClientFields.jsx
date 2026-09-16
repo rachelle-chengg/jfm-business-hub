@@ -1,12 +1,19 @@
+import { useState } from "react";
 import Field from "./Field.jsx";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function ClientFields({ client, onChange }) {
+  const [emailTouched, setEmailTouched] = useState(false);
+
   const bind = (key, extra = {}) => ({
     id: `client-${key}`,
     value: client[key],
     onChange: (e) => onChange({ [key]: e.target.value }),
     ...extra,
   });
+
+  const emailInvalid = emailTouched && client.email && !EMAIL_RE.test(client.email);
 
   return (
     <section className="form__section">
@@ -24,8 +31,20 @@ export default function ClientFields({ client, onChange }) {
         <Field label="Phone" id="client-phone">
           <input className="input" type="tel" {...bind("phone")} />
         </Field>
-        <Field label="Email" id="client-email">
-          <input className="input" type="email" {...bind("email")} />
+        <Field
+          label="Email"
+          id="client-email"
+          hint={emailInvalid ? "Please enter a valid email address." : undefined}
+          hintError={emailInvalid}
+        >
+          <input
+            className={`input${emailInvalid ? " input--error" : ""}`}
+            type="email"
+            id="client-email"
+            value={client.email}
+            onChange={(e) => onChange({ email: e.target.value })}
+            onBlur={() => setEmailTouched(true)}
+          />
         </Field>
       </div>
     </section>

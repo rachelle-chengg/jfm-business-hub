@@ -7,6 +7,14 @@ export default function InvoiceTotals({ totals, tax }) {
         <span>Subtotal</span>
         <span>{formatCurrency(totals.subtotal)}</span>
       </div>
+
+      {totals.discountAmount > 0 && (
+        <div className="sheet__totals-row">
+          <span>Discount</span>
+          <span>−{formatCurrency(totals.discountAmount)}</span>
+        </div>
+      )}
+
       {tax.enabled ? (
         <div className="sheet__totals-row">
           <span>
@@ -15,6 +23,14 @@ export default function InvoiceTotals({ totals, tax }) {
           <span>{formatCurrency(totals.taxAmount)}</span>
         </div>
       ) : null}
+
+      {totals.interestAmount > 0 && (
+        <div className="sheet__totals-row">
+          <span>{totals.interestLabel}</span>
+          <span>{formatCurrency(totals.interestAmount)}</span>
+        </div>
+      )}
+
       <div className="sheet__totals-rule" />
       <div className="sheet__totals-row sheet__totals-row--due">
         <span>Balance Due</span>

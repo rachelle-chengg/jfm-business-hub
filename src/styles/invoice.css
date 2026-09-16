@@ -336,3 +336,14 @@
     print-color-adjust: exact;
   }
 }
+
+/* Footer hyperlinks — no underline, inherit color ------------------------- */
+
+.sheet__footer-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sheet__footer-link:hover {
+  text-decoration: none;
+}

@@ -24,14 +24,42 @@ export function formatLineAmount(raw) {
   return n === null ? String(raw ?? "") : formatCurrency(n);
 }
 
-export function calculateTotals(items, tax) {
+export function calculateTotals(items, tax, adjustment = {}) {
   const subtotal = items.reduce((sum, item) => {
     const n = parseAmount(item.amount);
     return n === null ? sum : sum + n;
   }, 0);
+
+  // Discount applied before tax
+  const disc = adjustment.discount;
+  let discountAmount = 0;
+  if (disc?.enabled && disc.value) {
+    discountAmount =
+      disc.type === "percent"
+        ? round2(subtotal * (Number(disc.value) / 100))
+        : round2(Number(disc.value));
+  }
+  const afterDiscount = round2(subtotal - discountAmount);
+
   const rate = tax.enabled ? Number(tax.rate) || 0 : 0;
-  const taxAmount = round2(subtotal * (rate / 100));
-  return { subtotal: round2(subtotal), taxAmount, rate, balanceDue: round2(subtotal + taxAmount) };
+  const taxAmount = round2(afterDiscount * (rate / 100));
+
+  // Interest / late fee added after tax
+  const int_ = adjustment.interest;
+  const interestAmount = int_?.enabled ? round2(Number(int_.value) || 0) : 0;
+
+  const balanceDue = round2(afterDiscount + taxAmount + interestAmount);
+
+  return {
+    subtotal: round2(subtotal),
+    discountAmount,
+    afterDiscount,
+    taxAmount,
+    rate,
+    interestAmount,
+    interestLabel: int_?.label || "Interest / Late Fee",
+    balanceDue,
+  };
 }
 
 function round2(n) {

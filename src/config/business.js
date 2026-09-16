@@ -5,6 +5,7 @@ export const BUSINESS = {
   shortName: "Jonathan Folk",
   phone: "(778) 708-5335",
   email: "info@jonathanfolk.ca",
+  website: "jonathanfolk.ca",
   taxId: "GST/HST: 734845001 RT0001",
 };
 

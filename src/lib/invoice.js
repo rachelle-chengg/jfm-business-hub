@@ -8,6 +8,11 @@ export function blankLineItem() {
   return { id: newId(), description: "", amount: "" };
 }
 
+export const ADJUSTMENT_DEFAULTS = {
+  discount: { enabled: false, type: "percent", value: 0 },
+  interest: { enabled: false, label: "Interest / Late Fee", value: 0 },
+};
+
 export function createInvoice({ invoiceNumber = "" } = {}) {
   const dateIssued = todayISO();
   return {
@@ -18,6 +23,7 @@ export function createInvoice({ invoiceNumber = "" } = {}) {
     client: { name: "", address1: "", address2: "", phone: "", email: "" },
     items: [blankLineItem()],
     tax: { ...TAX_DEFAULTS },
+    adjustment: { ...ADJUSTMENT_DEFAULTS },
   };
 }
 
