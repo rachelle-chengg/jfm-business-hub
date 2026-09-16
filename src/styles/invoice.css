@@ -296,6 +296,13 @@
 
 @media print {
   html,
+  body,
+  #root {
+    height: 11in;
+    overflow: hidden;
+  }
+
+  html,
   body {
     margin: 0;
     padding: 0;
