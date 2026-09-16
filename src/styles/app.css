@@ -4,17 +4,17 @@
    ========================================================================== */
 
 :root {
-  --ui-bg: #ffffff;
-  --ui-stage: #f3f3f0;
-  --ui-text: #1b1b1b;
+  --ui-bg: #FFFFFF;
+  --ui-stage: #F1F1F1;
+  --ui-text: #1C1C1C;
   --ui-muted: #6b6b66;
   --ui-line: #e4e4df;
   --ui-line-strong: #c9c9c2;
-  --ui-accent: #5b6f40;
-  --ui-accent-hover: #4d5e36;
-  --ui-focus: rgba(91, 111, 64, 0.28);
+  --ui-accent: #647849;
+  --ui-accent-hover: #536339;
+  --ui-focus: rgba(100, 120, 73, 0.28);
   --ui-danger: #b3261e;
-  --ui-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ui-font: "Montserrat", "Inter", system-ui, -apple-system, sans-serif;
   --ui-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --ui-radius: 6px;
   --editor-width: 420px;
@@ -373,7 +373,7 @@ body {
     --ui-muted: #9d9d95;
     --ui-line: #2c2c29;
     --ui-line-strong: #45453f;
-    --ui-focus: rgba(122, 150, 84, 0.35);
+    --ui-focus: rgba(100, 120, 73, 0.35);
   }
   :root:not([data-theme="light"]) .input:disabled,
   :root:not([data-theme="light"]) .btn--ghost:hover {
@@ -391,5 +391,5 @@ body {
   --ui-muted: #9d9d95;
   --ui-line: #2c2c29;
   --ui-line-strong: #45453f;
-  --ui-focus: rgba(122, 150, 84, 0.35);
+  --ui-focus: rgba(100, 120, 73, 0.35);
 }
