@@ -1,0 +1,395 @@
+/* ==========================================================================
+   Editor chrome. Deliberately plain: the invoice is the only thing on the
+   screen that should look designed.
+   ========================================================================== */
+
+:root {
+  --ui-bg: #ffffff;
+  --ui-stage: #f3f3f0;
+  --ui-text: #1b1b1b;
+  --ui-muted: #6b6b66;
+  --ui-line: #e4e4df;
+  --ui-line-strong: #c9c9c2;
+  --ui-accent: #5b6f40;
+  --ui-accent-hover: #4d5e36;
+  --ui-focus: rgba(91, 111, 64, 0.28);
+  --ui-danger: #b3261e;
+  --ui-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ui-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ui-radius: 6px;
+  --editor-width: 420px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--ui-font);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ui-text);
+  background: var(--ui-stage);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: var(--editor-width) 1fr;
+  height: 100%;
+}
+
+/* Editor column ----------------------------------------------------------- */
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--ui-bg);
+  border-right: 1px solid var(--ui-line);
+  overflow: hidden;
+}
+
+.editor__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.editor__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.editor__subtitle {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--ui-muted);
+}
+
+.editor__footer {
+  padding: 16px 28px 20px;
+  border-top: 1px solid var(--ui-line);
+  background: var(--ui-bg);
+}
+
+.form {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 28px 24px;
+}
+
+.form__section {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.form__section:last-child {
+  border-bottom: 0;
+}
+
+.form__heading {
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+/* Fields ------------------------------------------------------------------ */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  min-width: 0;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field__label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.field__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field-row--align {
+  align-items: end;
+}
+
+.field-row .field {
+  margin-bottom: 14px;
+}
+
+.input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ui-text);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line-strong);
+  border-radius: var(--ui-radius);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.input:hover {
+  border-color: #b3b3ab;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 3px var(--ui-focus);
+}
+
+.input:disabled {
+  color: var(--ui-muted);
+  background: #f7f7f5;
+}
+
+.input--mono {
+  font-family: var(--ui-mono);
+  font-size: 13.5px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ui-accent);
+}
+
+/* Line items -------------------------------------------------------------- */
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.items__head,
+.items__row {
+  display: grid;
+  grid-template-columns: 1fr 118px 28px;
+  gap: 8px;
+  align-items: center;
+}
+
+.items__head {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui-muted);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--ui-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--ui-radius);
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.icon-btn:hover {
+  color: var(--ui-danger);
+  background: #fbeeed;
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
+}
+
+/* Buttons ----------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: var(--ui-radius);
+  border: 1px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn--primary {
+  width: 100%;
+  height: 40px;
+  color: #fff;
+  background: var(--ui-accent);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--ui-accent-hover);
+}
+
+.btn--ghost {
+  color: var(--ui-text);
+  background: var(--ui-bg);
+  border-color: var(--ui-line-strong);
+}
+
+.btn--ghost:hover {
+  background: #f7f7f5;
+}
+
+.btn--block {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.link {
+  padding: 0;
+  font: inherit;
+  color: var(--ui-accent);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.download__hint {
+  margin: 8px 0 0;
+  font-family: var(--ui-mono);
+  font-size: 11.5px;
+  color: var(--ui-muted);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Preview stage ----------------------------------------------------------- */
+
+.stage {
+  height: 100%;
+  overflow: auto;
+  padding: 32px;
+}
+
+/* Narrow screens: stack. V1 is desktop-first but should not break. --------- */
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+  }
+
+  .editor {
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--ui-line);
+  }
+
+  .form {
+    overflow: visible;
+  }
+
+  .stage {
+    height: auto;
+    padding: 16px;
+  }
+
+  .preview {
+    height: auto;
+    aspect-ratio: 8.5 / 11;
+  }
+}
+
+/* Dark editor when the host prefers it. The invoice sheet stays light on purpose. */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ui-bg: #1c1c1a;
+    --ui-stage: #121211;
+    --ui-text: #ecece7;
+    --ui-muted: #9d9d95;
+    --ui-line: #2c2c29;
+    --ui-line-strong: #45453f;
+    --ui-focus: rgba(122, 150, 84, 0.35);
+  }
+  :root:not([data-theme="light"]) .input:disabled,
+  :root:not([data-theme="light"]) .btn--ghost:hover {
+    background: #262624;
+  }
+  :root:not([data-theme="light"]) .icon-btn:hover {
+    background: #3a2422;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ui-bg: #1c1c1a;
+  --ui-stage: #121211;
+  --ui-text: #ecece7;
+  --ui-muted: #9d9d95;
+  --ui-line: #2c2c29;
+  --ui-line-strong: #45453f;
+  --ui-focus: rgba(122, 150, 84, 0.35);
+}

@@ -1,0 +1,331 @@
+/* ==========================================================================
+   Invoice sheet. Laid out in physical inches on an 8.5 x 11 page so the
+   on-screen preview and the printed PDF are the same document.
+   Reference: Kadium No. 4 invoice 25079 (InDesign, Gotham SSm).
+   ========================================================================== */
+
+:root {
+  --inv-olive: #5b6f40;
+  --inv-paper: #eae9e9;
+  --inv-ink: #231f20;
+  --inv-white: #ffffff;
+  --inv-font: "Montserrat", "Gotham SSm", "Gotham", "Helvetica Neue", Arial, sans-serif;
+  --inv-margin: 1in;
+  --inv-content-width: 6.5in;
+}
+
+.preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.preview__scaler {
+  position: relative;
+  flex: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 12px 40px -12px rgba(0, 0, 0, 0.25);
+}
+
+.sheet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8.5in;
+  height: 11in;
+  transform-origin: top left;
+  overflow: hidden;
+  background: var(--inv-paper);
+  color: var(--inv-ink);
+  font-family: var(--inv-font);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 19px;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+  padding: 0 var(--inv-margin);
+}
+
+.sheet * {
+  box-sizing: border-box;
+}
+
+.sheet address {
+  font-style: normal;
+}
+
+/* Corners and footer ----------------------------------------------------- */
+
+.sheet__corner {
+  position: absolute;
+  inset: 0;
+  width: 8.5in;
+  height: 11in;
+  fill: var(--inv-olive);
+  pointer-events: none;
+}
+
+.sheet__footer {
+  position: absolute;
+  left: 1.695in;
+  right: 0;
+  top: 10.225in;
+  height: 0.775in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28in;
+  padding-right: 0.5in;
+  font-weight: 700;
+  font-size: 15.5px;
+}
+
+.sheet__footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.09in;
+}
+
+.sheet__footer-item svg {
+  width: 0.28in;
+  height: 0.28in;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+.sheet__header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-top: 0.8in;
+}
+
+.sheet__title {
+  margin: 0.12in 0 0;
+  font-weight: 700;
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.sheet__business {
+  margin-top: 0.29in;
+}
+
+.sheet__logo {
+  /* The PNG carries transparent padding; sized so the artwork itself is 1.68in wide. */
+  width: 2.18in;
+  height: auto;
+  margin: -0.11in -0.5in 0 0;
+}
+
+/* Client + meta ----------------------------------------------------------- */
+
+.sheet__client {
+  position: relative;
+  margin-top: 0.37in;
+  max-width: 4.6in;
+  min-height: 1.42in; /* keeps the table at 4.64in whether the client has 2 or 5 lines */
+}
+
+.sheet__issued {
+  margin: 0 0 0.07in;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.sheet__placeholder {
+  color: rgba(35, 31, 32, 0.35);
+}
+
+.sheet__meta {
+  position: absolute;
+  top: 2.34in;
+  right: var(--inv-margin);
+  width: 1.12in;
+  margin: 0;
+  text-align: center;
+}
+
+.sheet__meta-row {
+  margin-bottom: 0.15in;
+}
+
+.sheet__meta-row dt {
+  font-weight: 700;
+  padding-bottom: 0.03in;
+  border-bottom: 1px solid var(--inv-ink);
+}
+
+.sheet__meta-row dd {
+  margin: 0.05in 0 0;
+}
+
+/* Divider + table --------------------------------------------------------- */
+
+.sheet__divider {
+  position: absolute;
+  top: 4.33in;
+  left: var(--inv-margin);
+  width: var(--inv-content-width);
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--inv-ink);
+}
+
+.sheet__table {
+  position: relative;
+  margin-top: 0.27in; /* sits at 4.64in with the reference client block */
+  width: var(--inv-content-width);
+  border-collapse: collapse;
+  background: var(--inv-white);
+}
+
+.sheet__table th,
+.sheet__table td {
+  border: 1px solid var(--inv-ink);
+  text-align: center;
+  padding: 0 0.12in;
+}
+
+.sheet__table th {
+  height: 0.4in;
+  background: var(--inv-olive);
+  color: var(--inv-white);
+  font-weight: 700;
+  font-size: 15.5px;
+}
+
+.sheet__table td {
+  height: 0.45in;
+}
+
+.sheet__table th:last-child,
+.sheet__table td:last-child {
+  width: 1.13in;
+  white-space: nowrap;
+}
+
+/* Settlement + totals ----------------------------------------------------- */
+
+.sheet__bottom {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 0.38in;
+}
+
+.sheet__settlement {
+  width: 3.75in;
+  font-size: 12.5px;
+  line-height: 16px;
+}
+
+.sheet__settlement h3 {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.sheet__settlement p {
+  margin: 0;
+}
+
+.sheet__settlement-note {
+  margin-top: 16px !important;
+}
+
+.sheet__totals {
+  width: 2.6in;
+  padding-top: 0.02in;
+  white-space: nowrap;
+}
+
+.sheet__totals-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.15in;
+  line-height: 0.24in;
+}
+
+.sheet__totals-row > span:first-child {
+  flex: 1;
+  text-align: right;
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.sheet__totals-row > span:last-child {
+  min-width: 1.15in;
+  text-align: right;
+}
+
+.sheet__totals-rule {
+  margin: 0.06in 0 0.16in 1.5in;
+  border-top: 1px solid var(--inv-ink);
+}
+
+.sheet__totals-row--due > span:first-child {
+  font-size: 17px;
+}
+
+.sheet__balance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15in;
+  height: 0.44in;
+  padding: 0 0.12in;
+  border: 1.5px solid var(--inv-ink);
+  background: var(--inv-white);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+/* Print: only the sheet, at scale 1, on a letter page ---------------------- */
+
+@page {
+  size: letter;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--inv-paper);
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .preview,
+  .preview__scaler {
+    position: static;
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none;
+    display: block;
+  }
+
+  .sheet,
+  .sheet * {
+    visibility: visible;
+  }
+
+  .sheet {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
