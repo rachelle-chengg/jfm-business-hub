@@ -4,33 +4,42 @@ import { listInvoices, effectiveStatus } from "../lib/db.js";
 import { buildReminders } from "../lib/reminders.js";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
+import { loadSettings } from "../lib/settings.js";
 
 const STATUS_LABEL = { draft: "Draft", sent: "Sent", paid: "Paid", overdue: "Overdue" };
+const AVATAR_COLORS = ["#647849", "#1d4ed8", "#b45309", "#7c3aed", "#0891b2", "#be185d"];
+
+function avatarColor(name) {
+  if (!name) return "#9d9d95";
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
 
 export default function HubPage() {
   const [invoices, setInvoices] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
+  const [listFilter, setListFilter] = useState("all");
+  const [balanceVisible, setBalanceVisible] = useState(true);
+  const businessName = loadSettings().business.shortName || loadSettings().business.name || "there";
 
-  useEffect(() => {
-    setInvoices(listInvoices());
-  }, []);
+  useEffect(() => { setInvoices(listInvoices()); }, []);
 
   const withStatus = invoices.map((inv) => ({ ...inv, _status: effectiveStatus(inv) }));
   const reminders = buildReminders(invoices);
 
-  // Stats
-  const total = withStatus.reduce((s, i) => s + (i.total || 0), 0);
   const outstanding = withStatus
     .filter((i) => i._status === "sent" || i._status === "overdue")
     .reduce((s, i) => s + (i.total || 0), 0);
-  const paid = withStatus
-    .filter((i) => i._status === "paid")
-    .reduce((s, i) => s + (i.total || 0), 0);
+  const sentCount = withStatus.filter((i) => i._status === "sent").length;
   const overdueCount = withStatus.filter((i) => i._status === "overdue").length;
+  const paid = withStatus.filter((i) => i._status === "paid").reduce((s, i) => s + (i.total || 0), 0);
+  const total = withStatus.reduce((s, i) => s + (i.total || 0), 0);
 
-  const recent = [...withStatus]
+  const filtered = [...withStatus]
+    .filter((i) => listFilter === "all" || i._status === listFilter)
     .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
-    .slice(0, 5);
+    .slice(0, 8);
 
   function copyEmail(reminder, id) {
     const text = `Subject: ${reminder.emailSubject}\n\n${reminder.emailBody}`;
@@ -40,8 +49,24 @@ export default function HubPage() {
     });
   }
 
+  const LIST_TABS = ["all", "draft", "sent", "overdue", "paid"];
+
   return (
-    <div className="hub-page">
+    <div className="hub-page hub-page--dashboard">
+      {/* Greeting */}
+      <div className="dash-greeting">
+        <div>
+          <h1 className="dash-greeting__name">Hi, {businessName} 👋</h1>
+          <p className="dash-greeting__sub">Welcome back</p>
+        </div>
+        {reminders.length > 0 && (
+          <div className="dash-greeting__bell" title={`${reminders.length} reminder${reminders.length !== 1 ? "s" : ""}`}>
+            <BellIcon />
+            <span className="dash-greeting__bell-badge">{reminders.length}</span>
+          </div>
+        )}
+      </div>
+
       {/* Reminder banners */}
       {reminders.length > 0 && (
         <section className="reminders">
@@ -61,19 +86,12 @@ export default function HubPage() {
                     <p className="reminder__sub">
                       {r.invoice.client?.name || "—"} &bull; {formatCurrency(r.invoice.total)}
                       {isOverdue && (
-                        <>
-                          {" "}&bull; Interest: {formatCurrency(r.interest)} &bull;{" "}
-                          <strong>Total owing: {formatCurrency(r.totalOwing)}</strong>
-                        </>
+                        <> &bull; Interest: {formatCurrency(r.interest)} &bull; <strong>Total: {formatCurrency(r.totalOwing)}</strong></>
                       )}
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="btn btn--ghost reminder__copy"
-                  onClick={() => copyEmail(r, id)}
-                >
+                <button type="button" className="btn btn--ghost reminder__copy" onClick={() => copyEmail(r, id)}>
                   {copiedId === id ? "✓ Copied!" : "Copy email"}
                 </button>
               </div>
@@ -82,53 +100,107 @@ export default function HubPage() {
         </section>
       )}
 
-      {/* Stats */}
-      <section className="stats">
-        <StatCard label="Total invoiced" value={formatCurrency(total)} />
-        <StatCard label="Outstanding" value={formatCurrency(outstanding)} accent />
-        <StatCard label="Collected" value={formatCurrency(paid)} />
-        <StatCard label="Overdue" value={overdueCount} danger={overdueCount > 0} unit="invoice" />
-      </section>
+      {/* Hero card */}
+      <div className="hero-card">
+        <p className="hero-card__label">Outstanding balance</p>
+        <div className="hero-card__amount-row">
+          <span className="hero-card__amount">
+            {balanceVisible ? formatCurrency(outstanding) : "••••••"}
+          </span>
+          <button className="hero-card__eye" onClick={() => setBalanceVisible((v) => !v)} aria-label="Toggle visibility">
+            <EyeIcon open={balanceVisible} />
+          </button>
+        </div>
+        <div className="hero-card__meta">
+          {sentCount > 0 && <span>{sentCount} sent</span>}
+          {overdueCount > 0 && <span className="hero-card__meta--warn">{overdueCount} overdue</span>}
+          {sentCount === 0 && overdueCount === 0 && <span>All clear</span>}
+        </div>
+        <div className="hero-card__footer">
+          <span className="hero-card__footer-label">Total invoiced</span>
+          <span className="hero-card__footer-value">{formatCurrency(total)}</span>
+          <span className="hero-card__footer-sep">·</span>
+          <span className="hero-card__footer-label">Collected</span>
+          <span className="hero-card__footer-value">{formatCurrency(paid)}</span>
+        </div>
+      </div>
+
+      {/* Quick actions */}
+      <div className="quick-actions">
+        <Link to="/invoices/new" className="quick-action">
+          <span className="quick-action__icon"><PlusIcon /></span>
+          <span>New Invoice</span>
+        </Link>
+        <Link to="/invoices" className="quick-action">
+          <span className="quick-action__icon"><ListIcon /></span>
+          <span>All Invoices</span>
+        </Link>
+        <Link to="/clients" className="quick-action">
+          <span className="quick-action__icon"><PersonIcon /></span>
+          <span>Clients</span>
+        </Link>
+        <Link to="/settings" className="quick-action">
+          <span className="quick-action__icon"><GearIcon /></span>
+          <span>Settings</span>
+        </Link>
+      </div>
 
       {/* Recent invoices */}
-      <section className="hub-section">
-        <div className="hub-section__head">
-          <h2 className="hub-section__title">Recent invoices</h2>
-          <Link to="/invoices" className="link">View all</Link>
+      <section>
+        <div className="dash-section-head">
+          <h2 className="dash-section-title">Recent Invoices</h2>
+          <Link to="/invoices" className="dash-see-all">See all</Link>
         </div>
-        {recent.length === 0 ? (
-          <EmptyState
-            msg="No invoices yet."
-            action={<Link to="/invoices/new" className="btn btn--primary">Create your first invoice</Link>}
-          />
+
+        {/* Filter tabs */}
+        <div className="filter-tabs filter-tabs--compact">
+          {LIST_TABS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className={`filter-tab filter-tab--${s}${listFilter === s ? " filter-tab--active" : ""}`}
+              onClick={() => setListFilter(s)}
+            >
+              {s === "all" ? "All" : STATUS_LABEL[s]}
+            </button>
+          ))}
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="empty-state">
+            <p>{listFilter !== "all" ? `No ${listFilter} invoices.` : "No invoices yet."}</p>
+            {listFilter === "all" && (
+              <Link to="/invoices/new" className="btn btn--primary">Create your first invoice</Link>
+            )}
+          </div>
         ) : (
-          <div className="inv-table-wrap">
-            <table className="inv-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Client</th>
-                  <th>Amount</th>
-                  <th>Due</th>
-                  <th>Status</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((inv) => (
-                  <tr key={inv.id}>
-                    <td className="inv-table__num">{inv.number || "—"}</td>
-                    <td>{inv.client?.name || "—"}</td>
-                    <td>{formatCurrency(inv.total || 0)}</td>
-                    <td>{formatShortDate(inv.dueDate)}</td>
-                    <td><StatusBadge status={inv._status} /></td>
-                    <td>
-                      <Link to={`/invoices/${inv.id}`} className="link">Edit</Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="inv-list">
+            {filtered.map((inv) => {
+              const clientName = inv.client?.name || "—";
+              const initial = clientName[0]?.toUpperCase() ?? "?";
+              return (
+                <Link to={`/invoices/${inv.id}`} key={inv.id} className="inv-list-item">
+                  <span
+                    className="inv-list-item__avatar"
+                    style={{ background: avatarColor(clientName) }}
+                  >
+                    {initial}
+                  </span>
+                  <span className="inv-list-item__body">
+                    <span className="inv-list-item__name">{clientName}</span>
+                    <span className="inv-list-item__sub">
+                      #{inv.number || "—"} &bull; {formatShortDate(inv.dueDate) || "No due date"}
+                    </span>
+                  </span>
+                  <span className="inv-list-item__right">
+                    <span className={`inv-list-item__amount inv-list-item__amount--${inv._status}`}>
+                      {formatCurrency(inv.total || 0)}
+                    </span>
+                    <StatusBadge status={inv._status} />
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>
@@ -136,30 +208,51 @@ export default function HubPage() {
   );
 }
 
-function StatCard({ label, value, accent, danger, unit }) {
-  const count = typeof value === "number";
-  const display = count ? value : value;
-  return (
-    <div className={`stat-card${accent ? " stat-card--accent" : ""}${danger ? " stat-card--danger" : ""}`}>
-      <span className="stat-card__value">{display}{count && unit ? ` ${unit}${value !== 1 ? "s" : ""}` : ""}</span>
-      <span className="stat-card__label">{label}</span>
-    </div>
-  );
-}
-
 export function StatusBadge({ status }) {
+  const labels = { draft: "Draft", sent: "Sent", paid: "Paid", overdue: "Overdue" };
   return (
     <span className={`status-badge status-badge--${status}`}>
-      {STATUS_LABEL[status] ?? status}
+      {labels[status] ?? status}
     </span>
   );
 }
 
-function EmptyState({ msg, action }) {
+function BellIcon() {
   return (
-    <div className="empty-state">
-      <p>{msg}</p>
-      {action}
-    </div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
   );
+}
+
+function EyeIcon({ open }) {
+  return open ? (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
+}
+
+function ListIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><circle cx="3" cy="6" r="1" fill="currentColor" /><circle cx="3" cy="12" r="1" fill="currentColor" /><circle cx="3" cy="18" r="1" fill="currentColor" /></svg>;
+}
+
+function PersonIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
+}
+
+function GearIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>;
 }

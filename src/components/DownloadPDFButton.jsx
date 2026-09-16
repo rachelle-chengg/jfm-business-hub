@@ -23,7 +23,7 @@ export default function DownloadPDFButton({ invoice, exportPdf = exportInvoiceTo
 
   return (
     <div className="download">
-      <button type="button" className="btn btn--primary" onClick={handleClick} disabled={state === "working"}>
+      <button type="button" className="btn btn--primary btn--block" onClick={handleClick} disabled={state === "working"}>
         {state === "working" ? "Preparing PDF\u2026" : "Download PDF"}
       </button>
       <p className="download__hint">

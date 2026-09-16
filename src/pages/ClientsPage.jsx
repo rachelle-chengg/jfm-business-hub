@@ -1,13 +1,33 @@
 import { useEffect, useState } from "react";
-import { listClients, saveClient, deleteClient } from "../lib/db.js";
-import { listInvoices } from "../lib/db.js";
+import { listClients, saveClient, deleteClient, listInvoices } from "../lib/db.js";
 import { formatCurrency } from "../lib/money.js";
+import { formatShortDate } from "../lib/dates.js";
+
+const SORT_OPTIONS = [
+  { value: "name", label: "Name (A–Z)" },
+  { value: "name-desc", label: "Name (Z–A)" },
+  { value: "total-desc", label: "Total billed: high to low" },
+  { value: "total-asc", label: "Total billed: low to high" },
+  { value: "invoices-desc", label: "Most invoices" },
+];
+
+function sortClients(clients, allStats, sortBy) {
+  const copy = [...clients];
+  switch (sortBy) {
+    case "name-desc": return copy.sort((a, b) => (b.name ?? "").localeCompare(a.name ?? ""));
+    case "total-desc": return copy.sort((a, b) => (allStats[b.id]?.total || 0) - (allStats[a.id]?.total || 0));
+    case "total-asc": return copy.sort((a, b) => (allStats[a.id]?.total || 0) - (allStats[b.id]?.total || 0));
+    case "invoices-desc": return copy.sort((a, b) => (allStats[b.id]?.count || 0) - (allStats[a.id]?.count || 0));
+    default: return copy.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+  }
+}
 
 export default function ClientsPage() {
   const [clients, setClients] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [search, setSearch] = useState("");
-  const [editingId, setEditingId] = useState(null); // null | "new" | <id>
+  const [sortBy, setSortBy] = useState("name");
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm());
 
   function load() {
@@ -15,19 +35,22 @@ export default function ClientsPage() {
     setInvoices(listInvoices());
   }
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
-  function clientStats(clientId, clientName) {
-    // Match by id if available, otherwise by name (for older invoices without clientId)
-    const related = invoices.filter(
-      (inv) => inv.clientId === clientId || inv.client?.name === clientName
-    );
-    const total = related.reduce((s, i) => s + (i.total || 0), 0);
-    const last = related.sort((a, b) => (b.dateIssued ?? "").localeCompare(a.dateIssued ?? ""))[0];
-    return { count: related.length, total, lastDate: last?.dateIssued ?? null };
+  function getStats() {
+    const map = {};
+    for (const c of clients) {
+      const related = invoices.filter(
+        (inv) => inv.clientId === c.id || inv.client?.name === c.name
+      );
+      const total = related.reduce((s, i) => s + (i.total || 0), 0);
+      const last = [...related].sort((a, b) => (b.dateIssued ?? "").localeCompare(a.dateIssued ?? ""))[0];
+      map[c.id] = { count: related.length, total, lastDate: last?.dateIssued ?? null };
+    }
+    return map;
   }
+
+  const allStats = getStats();
 
   function startEdit(client) {
     setForm({ ...emptyForm(), ...client });
@@ -39,9 +62,7 @@ export default function ClientsPage() {
     setEditingId("new");
   }
 
-  function cancelEdit() {
-    setEditingId(null);
-  }
+  function cancelEdit() { setEditingId(null); }
 
   function handleSave(e) {
     e.preventDefault();
@@ -58,15 +79,19 @@ export default function ClientsPage() {
     load();
   }
 
-  const filtered = clients.filter((c) => {
-    const q = search.toLowerCase();
-    return (
-      !q ||
-      (c.name || "").toLowerCase().includes(q) ||
-      (c.email || "").toLowerCase().includes(q) ||
-      (c.phone || "").toLowerCase().includes(q)
-    );
-  });
+  const filtered = sortClients(
+    clients.filter((c) => {
+      const q = search.toLowerCase();
+      return (
+        !q ||
+        (c.name || "").toLowerCase().includes(q) ||
+        (c.email || "").toLowerCase().includes(q) ||
+        (c.phone || "").toLowerCase().includes(q)
+      );
+    }),
+    allStats,
+    sortBy
+  );
 
   return (
     <div className="hub-page">
@@ -87,55 +112,39 @@ export default function ClientsPage() {
             <div className="field-row">
               <div className="field">
                 <label className="field__label">Name *</label>
-                <input
-                  className="input"
-                  value={form.name}
+                <input className="input" value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  required
-                  autoFocus
-                />
+                  required autoFocus />
               </div>
               <div className="field">
                 <label className="field__label">Email</label>
-                <input
-                  className="input"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                />
+                <input className="input" type="email" value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
               </div>
             </div>
             <div className="field-row">
               <div className="field">
                 <label className="field__label">Phone</label>
-                <input
-                  className="input"
-                  value={form.phone}
-                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                />
+                <input className="input" value={form.phone}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
               </div>
               <div className="field">
                 <label className="field__label">Address</label>
-                <input
-                  className="input"
-                  value={form.address1}
-                  onChange={(e) => setForm((f) => ({ ...f, address1: e.target.value }))}
-                />
+                <input className="input" value={form.address1}
+                  onChange={(e) => setForm((f) => ({ ...f, address1: e.target.value }))} />
               </div>
             </div>
             <div className="form-actions">
               <button type="submit" className="btn btn--primary">
                 {editingId === "new" ? "Add client" : "Save changes"}
               </button>
-              <button type="button" className="btn btn--ghost" onClick={cancelEdit}>
-                Cancel
-              </button>
+              <button type="button" className="btn btn--ghost" onClick={cancelEdit}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Search */}
+      {/* Toolbar */}
       <div className="toolbar">
         <input
           className="input toolbar__search"
@@ -144,6 +153,16 @@ export default function ClientsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <select
+          className="input toolbar__sort"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          aria-label="Sort clients"
+        >
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
       </div>
 
       {filtered.length === 0 ? (
@@ -171,7 +190,7 @@ export default function ClientsPage() {
             </thead>
             <tbody>
               {filtered.map((c) => {
-                const stats = clientStats(c.id, c.name);
+                const stats = allStats[c.id] || { count: 0, total: 0, lastDate: null };
                 return (
                   <tr key={c.id}>
                     <td><strong>{c.name}</strong></td>
@@ -179,22 +198,26 @@ export default function ClientsPage() {
                     <td>{c.phone || "—"}</td>
                     <td>{stats.count}</td>
                     <td>{formatCurrency(stats.total)}</td>
-                    <td>{stats.lastDate ? stats.lastDate : "—"}</td>
+                    <td>{stats.lastDate ? formatShortDate(stats.lastDate) : "—"}</td>
                     <td>
                       <div className="row-actions">
                         <button
                           type="button"
-                          className="btn btn--ghost btn--sm"
+                          className="icon-btn icon-btn--edit"
                           onClick={() => startEdit(c)}
+                          title="Edit client"
+                          aria-label={`Edit ${c.name}`}
                         >
-                          Edit
+                          <PencilIcon />
                         </button>
                         <button
                           type="button"
-                          className="btn btn--danger btn--sm"
+                          className="icon-btn icon-btn--delete"
                           onClick={() => handleDelete(c)}
+                          title="Delete client"
+                          aria-label={`Delete ${c.name}`}
                         >
-                          Delete
+                          <TrashIcon />
                         </button>
                       </div>
                     </td>
@@ -211,4 +234,24 @@ export default function ClientsPage() {
 
 function emptyForm() {
   return { name: "", email: "", phone: "", address1: "", address2: "" };
+}
+
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  );
 }

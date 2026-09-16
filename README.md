@@ -1,6 +1,8 @@
 # Jonathan Folk Media invoice generator
 
-Form on the left, live letter-size invoice preview on the right, one-click PDF.
+**Live:** https://jfm-invoices.vercel.app
+
+Invoice hub with dashboard, client management, PDF export, and Google Drive upload.
 
 ## Run
 
