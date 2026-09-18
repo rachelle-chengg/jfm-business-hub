@@ -1,12 +1,58 @@
 import { useState } from "react";
-import { loadSettings, saveSettings } from "../lib/settings.js";
+import { listTemplates, saveTemplate, createTemplate, duplicateTemplate, deleteTemplate } from "../lib/templates.js";
 import { revokeToken } from "../lib/googleAuth.js";
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState(() => loadSettings());
+  const [templates, setTemplates] = useState(() => listTemplates());
+  const [selectedId, setSelectedId] = useState(() => templates[0]?.id);
+  const [draft, setDraft] = useState(() => templates[0]);
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [googleDisconnected, setGoogleDisconnected] = useState(false);
+
+  const selected = templates.find((t) => t.id === selectedId) ?? templates[0];
+
+  function reload(nextSelectedId) {
+    const fresh = listTemplates();
+    setTemplates(fresh);
+    const nextId = nextSelectedId ?? selectedId;
+    const next = fresh.find((t) => t.id === nextId) ?? fresh[0];
+    setSelectedId(next.id);
+    setDraft(next);
+    setEditing(false);
+  }
+
+  function selectTemplate(id) {
+    if (id === selectedId) return;
+    if (editing && !window.confirm("Discard unsaved changes to this template?")) return;
+    setSelectedId(id);
+    setDraft(templates.find((t) => t.id === id));
+    setEditing(false);
+  }
+
+  function handleNewTemplate() {
+    const name = window.prompt("Name this template (e.g. a client's brand, or a different business line):", "New template");
+    if (!name) return;
+    const created = createTemplate(name);
+    reload(created.id);
+  }
+
+  function handleDuplicate() {
+    const name = window.prompt("Name for the duplicate:", `${selected.name} copy`);
+    if (!name) return;
+    const copy = duplicateTemplate(selected.id, name);
+    reload(copy.id);
+  }
+
+  function handleDelete() {
+    if (templates.length <= 1) {
+      window.alert("You need at least one template — add a new one before deleting this.");
+      return;
+    }
+    if (!window.confirm(`Delete the "${selected.name}" template? Invoices already created with it keep their info — only the template itself is removed.`)) return;
+    deleteTemplate(selected.id);
+    reload();
+  }
 
   function handleDisconnectGoogle() {
     if (!window.confirm("Disconnect your Google account? You'll be asked to sign in again next time you save an invoice to Drive.")) return;
@@ -15,28 +61,26 @@ export default function SettingsPage() {
     setTimeout(() => setGoogleDisconnected(false), 3000);
   }
 
-  const setBusiness = (patch) =>
-    setSettings((s) => ({ ...s, business: { ...s.business, ...patch } }));
-  const setSettlement = (patch) =>
-    setSettings((s) => ({ ...s, settlement: { ...s.settlement, ...patch } }));
-  const setTax = (patch) =>
-    setSettings((s) => ({ ...s, taxDefaults: { ...s.taxDefaults, ...patch } }));
+  const setName = (name) => setDraft((d) => ({ ...d, name }));
+  const setBusiness = (patch) => setDraft((d) => ({ ...d, business: { ...d.business, ...patch } }));
+  const setSettlement = (patch) => setDraft((d) => ({ ...d, settlement: { ...d.settlement, ...patch } }));
+  const setTax = (patch) => setDraft((d) => ({ ...d, taxDefaults: { ...d.taxDefaults, ...patch } }));
 
   function handleSave(e) {
     e.preventDefault();
-    if (!window.confirm("Save these settings? They will apply to all new invoices.")) return;
-    saveSettings(settings);
-    setEditing(false);
+    if (!window.confirm(`Save changes to "${draft.name}"? This applies to new invoices created with this template — invoices already made keep their existing info.`)) return;
+    saveTemplate(draft);
+    reload(draft.id);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
 
   function handleCancel() {
-    setSettings(loadSettings());
+    setDraft(selected);
     setEditing(false);
   }
 
-  const { business, settlement, taxDefaults } = settings;
+  const { business, settlement, taxDefaults } = draft;
 
   return (
     <div className="hub-page">
@@ -51,17 +95,41 @@ export default function SettingsPage() {
           ) : (
             <>
               <button type="button" className="btn btn--ghost" onClick={handleCancel}>Cancel</button>
-              <button type="submit" form="settings-form" className="btn btn--primary">Save settings</button>
+              <button type="submit" form="settings-form" className="btn btn--primary">Save template</button>
             </>
           )}
         </div>
+      </div>
+
+      {/* Template switcher */}
+      <div className="filter-tabs-row" style={{ marginBottom: 20 }}>
+        <div className="filter-tabs" style={{ marginBottom: 0, flex: 1 }}>
+          {templates.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`filter-tab${t.id === selectedId ? " filter-tab--active filter-tab--all" : ""}`}
+              onClick={() => selectTemplate(t.id)}
+            >
+              {t.name}
+            </button>
+          ))}
+        </div>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={handleNewTemplate}>+ New template</button>
+      </div>
+
+      <div className="hub-page__head-actions" style={{ marginBottom: 20 }}>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={handleDuplicate}>Duplicate this template</button>
+        <button type="button" className="btn btn--danger btn--sm" onClick={handleDelete}>Delete this template</button>
       </div>
 
       <form id="settings-form" onSubmit={handleSave}>
         {/* Business info */}
         <div className="settings-card">
           <h2 className="settings-card__title">Business information</h2>
-          <p className="settings-card__hint">Appears on every invoice header and footer.</p>
+          <p className="settings-card__hint">Appears on every invoice created with the "{draft.name}" template.</p>
+          <ReadOnlyOrInput editing={editing} label="Template name" id="s-template-name" value={draft.name}
+            onChange={(e) => setName(e.target.value)} />
           <div className="field-row">
             <ReadOnlyOrInput editing={editing} label="Business name" id="s-name" value={business.name}
               onChange={(e) => setBusiness({ name: e.target.value })} />
@@ -108,7 +176,7 @@ export default function SettingsPage() {
         {/* Tax defaults */}
         <div className="settings-card">
           <h2 className="settings-card__title">Default tax settings</h2>
-          <p className="settings-card__hint">Applied to all new invoices. You can override per invoice.</p>
+          <p className="settings-card__hint">Applied to new invoices created with this template. You can override per invoice.</p>
           <div className="field-row">
             <ReadOnlyOrInput editing={editing} label="Tax label" id="s-taxlabel" value={taxDefaults.label}
               onChange={(e) => setTax({ label: e.target.value })} />

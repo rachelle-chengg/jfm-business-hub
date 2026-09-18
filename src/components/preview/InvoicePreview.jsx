@@ -38,14 +38,14 @@ export default function InvoicePreview({ invoice, totals }) {
         style={{ width: SHEET_WIDTH_PX * scale, height: SHEET_HEIGHT_PX * scale }}
       >
         <div className="sheet" id="invoice-sheet" style={{ transform: `scale(${scale})` }}>
-          <InvoiceFrame />
-          <InvoiceHeader />
+          <InvoiceFrame business={invoice.businessInfo} />
+          <InvoiceHeader business={invoice.businessInfo} />
           <ClientInfo client={invoice.client} />
           <InvoiceMeta invoice={invoice} />
           <hr className="sheet__divider" />
           <InvoiceTable items={invoice.items} />
           <div className="sheet__bottom">
-            <SettlementInfo />
+            <SettlementInfo settlement={invoice.settlementInfo} />
             <InvoiceTotals totals={totals} tax={invoice.tax} />
           </div>
         </div>

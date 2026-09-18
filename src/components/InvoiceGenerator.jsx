@@ -11,8 +11,22 @@ import { saveInvoice } from "../lib/db.js";
 import { generatePdfBlob, uploadInvoiceToDrive } from "../lib/drive.js";
 import { suggestedFilename } from "../lib/invoice.js";
 import { DUE_DATE_OFFSET_DAYS } from "../config/business.js";
+import { getTemplate } from "../lib/templates.js";
 
 const DEFAULT_INVOICE_NUMBER = `${String(new Date().getFullYear()).slice(-2)}001`;
+
+/** Invoices saved before templates existed won't have businessInfo/
+ *  settlementInfo — backfill from that invoice's template (or the default
+ *  one) so old invoices keep rendering exactly as they always did. */
+function withTemplateFallback(inv) {
+  if (inv.businessInfo && inv.settlementInfo) return inv;
+  const fallback = getTemplate(inv.templateId);
+  return {
+    ...inv,
+    businessInfo: inv.businessInfo ?? fallback.business,
+    settlementInfo: inv.settlementInfo ?? fallback.settlement,
+  };
+}
 
 export default function InvoiceGenerator({
   exportPdf,
@@ -21,7 +35,7 @@ export default function InvoiceGenerator({
   onSaved,
 }) {
   const [invoice, setInvoice] = useState(() => {
-    if (initialInvoice) return { ...initialInvoice };
+    if (initialInvoice) return withTemplateFallback({ ...initialInvoice });
     return loadDraft() ?? createInvoice({ invoiceNumber: DEFAULT_INVOICE_NUMBER });
   });
   const [mobileView, setMobileView] = useState("editor");
@@ -62,6 +76,19 @@ export default function InvoiceGenerator({
       dueDateOverridden: false,
     });
   const setItems = (items) => update({ items });
+
+  /** Swapping templates (only offered before an invoice is first saved)
+   *  re-snapshots business info, payment instructions, and tax defaults. */
+  const selectTemplate = (templateId) => {
+    const template = getTemplate(templateId);
+    setInvoice((prev) => ({
+      ...prev,
+      templateId: template.id,
+      businessInfo: { ...template.business },
+      settlementInfo: { ...template.settlement },
+      tax: { ...template.taxDefaults },
+    }));
+  };
 
   const startNewInvoice = () => {
     if (!window.confirm("Start a new invoice? The current one will be cleared.")) return;
@@ -134,6 +161,8 @@ export default function InvoiceGenerator({
         <div className="editor__scroll">
           <InvoiceForm
             invoice={invoice}
+            isNew={!invoiceId}
+            onSelectTemplate={selectTemplate}
             onUpdate={update}
             onUpdateClient={updateClient}
             onUpdateTax={updateTax}

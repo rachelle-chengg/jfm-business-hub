@@ -5,8 +5,13 @@
  * 1.5% per month, compounded monthly (= 19.56% annual).
  */
 
-import { BUSINESS, SETTLEMENT } from "../config/business.js";
 import { formatCurrency } from "./money.js";
+import { getTemplate } from "./templates.js";
+
+/** Old invoices (pre-templates) have no businessInfo of their own. */
+function businessFor(inv) {
+  return inv.businessInfo ?? getTemplate(inv.templateId).business;
+}
 
 const INTEREST_RATE_MONTHLY = 0.015; // 1.5 % per month
 const WARN_DAYS_BEFORE = 7;          // show "due soon" banner
@@ -94,9 +99,9 @@ As noted in our invoice terms, carrying charges of 1.5% per month (compounded mo
 
 Please arrange payment at your earliest convenience. If you have any questions or need to discuss payment arrangements, don't hesitate to reach out.
 
-${BUSINESS.name}
-${BUSINESS.phone}
-${BUSINESS.email}`;
+${businessFor(inv).name}
+${businessFor(inv).phone}
+${businessFor(inv).email}`;
 
   return { emailSubject: subject, emailBody: body };
 }
@@ -112,9 +117,9 @@ Just a friendly reminder that Invoice #${inv.number} for ${formatCurrency(inv.to
 
 If you have any questions about the invoice, please don't hesitate to get in touch.
 
-${BUSINESS.name}
-${BUSINESS.phone}
-${BUSINESS.email}`;
+${businessFor(inv).name}
+${businessFor(inv).phone}
+${businessFor(inv).email}`;
 
   return { emailSubject: subject, emailBody: body };
 }

@@ -1,10 +1,38 @@
 import Field from "./Field.jsx";
 import { DUE_DATE_OFFSET_DAYS } from "../../config/business.js";
+import { listTemplates } from "../../lib/templates.js";
 
-export default function InvoiceDetails({ invoice, onUpdate, onSetDateIssued, onSetDueDate, onResetDueDate }) {
+export default function InvoiceDetails({ invoice, isNew, onSelectTemplate, onUpdate, onSetDateIssued, onSetDueDate, onResetDueDate }) {
+  const templates = listTemplates();
+
   return (
     <section className="form__section">
       <h2 className="form__heading">Invoice</h2>
+      {isNew && templates.length > 1 && (
+        <Field
+          label="Template"
+          id="invoice-template"
+          hint="Sets the business info and payment instructions this invoice will use — locked in once you save it."
+        >
+          <select
+            className="input"
+            id="invoice-template"
+            value={invoice.templateId || templates[0].id}
+            onChange={(e) => onSelectTemplate(e.target.value)}
+          >
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </Field>
+      )}
+      {!isNew && templates.length > 1 && (
+        <Field label="Template" id="invoice-template-readonly">
+          <div className="settings-readonly">
+            {templates.find((t) => t.id === invoice.templateId)?.name || "Default"}
+          </div>
+        </Field>
+      )}
       <Field label="Invoice number" id="invoice-number">
         <input
           className="input input--mono"

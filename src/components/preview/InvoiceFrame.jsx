@@ -1,7 +1,5 @@
-import { BUSINESS } from "../../config/business.js";
-
 /** Decorative corners and the branded footer band. Pure presentation. */
-export default function InvoiceFrame() {
+export default function InvoiceFrame({ business }) {
   return (
     <>
       <svg className="sheet__corner" viewBox="0 0 8.5 11" preserveAspectRatio="none" aria-hidden="true">
@@ -9,24 +7,24 @@ export default function InvoiceFrame() {
         <polygon points="0.92,11 1.695,10.225 8.5,10.225 8.5,11" />
       </svg>
       <footer className="sheet__footer">
-        <span className="sheet__footer-name">{BUSINESS.shortName}</span>
-        <a href={`tel:${BUSINESS.phone.replace(/\D/g, "")}`} className="sheet__footer-item sheet__footer-link">
+        <span className="sheet__footer-name">{business.shortName}</span>
+        <a href={`tel:${business.phone.replace(/\D/g, "")}`} className="sheet__footer-item sheet__footer-link">
           <PhoneIcon />
-          {BUSINESS.phone}
+          {business.phone}
         </a>
-        <a href={`mailto:${BUSINESS.email}`} className="sheet__footer-item sheet__footer-link">
+        <a href={`mailto:${business.email}`} className="sheet__footer-item sheet__footer-link">
           <MailIcon />
-          {BUSINESS.email}
+          {business.email}
         </a>
-        {BUSINESS.website && (
+        {business.website && (
           <a
-            href={`https://${BUSINESS.website}`}
+            href={`https://${business.website}`}
             className="sheet__footer-item sheet__footer-link"
             target="_blank"
             rel="noopener noreferrer"
           >
             <GlobeIcon />
-            {BUSINESS.website}
+            {business.website}
           </a>
         )}
       </footer>

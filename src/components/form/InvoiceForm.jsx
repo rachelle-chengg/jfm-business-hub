@@ -7,6 +7,8 @@ import { ADJUSTMENT_DEFAULTS } from "../../lib/invoice.js";
 
 export default function InvoiceForm({
   invoice,
+  isNew,
+  onSelectTemplate,
   onUpdate,
   onUpdateClient,
   onUpdateTax,
@@ -21,6 +23,8 @@ export default function InvoiceForm({
     <div className="form">
       <InvoiceDetails
         invoice={invoice}
+        isNew={isNew}
+        onSelectTemplate={onSelectTemplate}
         onUpdate={onUpdate}
         onSetDateIssued={onSetDateIssued}
         onSetDueDate={onSetDueDate}

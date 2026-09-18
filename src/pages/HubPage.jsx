@@ -5,7 +5,7 @@ import { listJobs, JOB_STATUS_LABEL } from "../lib/jobs.js";
 import { buildReminders } from "../lib/reminders.js";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate, todayISO, addDays } from "../lib/dates.js";
-import { loadSettings } from "../lib/settings.js";
+import { listTemplates } from "../lib/templates.js";
 import { DocumentIcon } from "../components/icons.jsx";
 
 const STATUS_LABEL = { draft: "Draft", sent: "Sent", paid: "Paid", overdue: "Overdue" };
@@ -24,7 +24,8 @@ export default function HubPage() {
   const [copiedId, setCopiedId] = useState(null);
   const [listFilter, setListFilter] = useState("all");
   const [balanceVisible, setBalanceVisible] = useState(true);
-  const businessName = loadSettings().business.shortName || loadSettings().business.name || "there";
+  const defaultBusiness = listTemplates()[0]?.business ?? {};
+  const businessName = defaultBusiness.shortName || defaultBusiness.name || "there";
 
   useEffect(() => {
     setInvoices(listInvoices());

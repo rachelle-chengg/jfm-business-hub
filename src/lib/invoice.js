@@ -1,5 +1,6 @@
-import { TAX_DEFAULTS, DUE_DATE_OFFSET_DAYS } from "../config/business.js";
+import { DUE_DATE_OFFSET_DAYS } from "../config/business.js";
 import { todayISO, addDays } from "./dates.js";
+import { getTemplate } from "./templates.js";
 
 let idSeed = 0;
 export const newId = () => `li-${Date.now().toString(36)}-${idSeed++}`;
@@ -13,8 +14,15 @@ export const ADJUSTMENT_DEFAULTS = {
   interest: { enabled: false, label: "Interest / Late Fee", value: 0 },
 };
 
-export function createInvoice({ invoiceNumber = "" } = {}) {
+/**
+ * Snapshots the chosen template's business info, payment instructions, and
+ * tax defaults onto the new invoice — same pattern as client info, which is
+ * already copied rather than referenced live. Editing the template later
+ * never changes this invoice.
+ */
+export function createInvoice({ invoiceNumber = "", templateId } = {}) {
   const dateIssued = todayISO();
+  const template = getTemplate(templateId);
   return {
     invoiceNumber,
     dateIssued,
@@ -22,8 +30,11 @@ export function createInvoice({ invoiceNumber = "" } = {}) {
     dueDateOverridden: false,
     client: { name: "", address1: "", address2: "", phone: "", email: "" },
     items: [blankLineItem()],
-    tax: { ...TAX_DEFAULTS },
+    tax: { ...template.taxDefaults },
     adjustment: { ...ADJUSTMENT_DEFAULTS },
+    templateId: template.id,
+    businessInfo: { ...template.business },
+    settlementInfo: { ...template.settlement },
   };
 }
 

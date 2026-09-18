@@ -1,8 +1,17 @@
 # Hub Design System
 
-**Scope:** the app shell — nav, dashboard, invoices, clients, settings, and the invoice editor's form panel (`src/styles/app.css`). The invoice PDF/print template (`src/styles/invoice.css`) is a separate, already-tuned client-facing document and is **not** covered by this system.
+**Scope:** the app shell — nav, dashboard, invoices, clients, settings, and the invoice editor's form panel (`src/styles/app.css`). The invoice PDF/print template's *visual design* (`src/styles/invoice.css`) is a separate, already-tuned client-facing document and is **not** covered by this system — but its *content* (business name, contact info, payment instructions, tax defaults) is now data, not hardcoded, via the templates system below.
 
 All tokens live in `:root` at the top of `src/styles/app.css`. Change a value there, not at the point of use.
+
+## Invoice templates (content, not layout)
+
+`src/lib/templates.js` holds multiple named templates — same invoice layout every time, swappable business info/payment instructions/tax defaults. This replaced `config/business.js` + `lib/settings.js` as the source of truth for what appears on a rendered invoice; those hardcoded values now only serve as the seed for the first ("Default") template.
+
+- An invoice **snapshots** its chosen template's `business`/`settlement`/`taxDefaults` onto itself at creation time (`templateId`, `businessInfo`, `settlementInfo` fields) — the same pattern client info already used (copied onto the invoice, not referenced live). Editing a template later never changes invoices already created from it.
+- The preview components (`InvoiceHeader.jsx`, `InvoiceFrame.jsx`, `SettlementInfo.jsx`) take `business`/`settlement` as **props**, not imports — never add a direct `config/business.js` import back into these, or the template system silently stops working for that component.
+- Old invoices saved before templates existed lack `businessInfo`/`settlementInfo`; `withTemplateFallback()` in `InvoiceGenerator.jsx` backfills them on load so nothing about existing invoices changes.
+- The template picker only appears when creating a **new** invoice (top of the "Invoice" form section); once saved, an invoice shows its template name read-only, since it's frozen.
 
 ---
 
