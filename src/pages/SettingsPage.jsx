@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { loadSettings, saveSettings } from "../lib/settings.js";
+import { revokeToken } from "../lib/googleAuth.js";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(() => loadSettings());
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [googleDisconnected, setGoogleDisconnected] = useState(false);
+
+  function handleDisconnectGoogle() {
+    if (!window.confirm("Disconnect your Google account? You'll be asked to sign in again next time you save an invoice to Drive.")) return;
+    revokeToken();
+    setGoogleDisconnected(true);
+    setTimeout(() => setGoogleDisconnected(false), 3000);
+  }
 
   const setBusiness = (patch) =>
     setSettings((s) => ({ ...s, business: { ...s.business, ...patch } }));
@@ -120,6 +129,21 @@ export default function SettingsPage() {
           )}
         </div>
       </form>
+
+      {/* Integrations — not part of the save/cancel form above, since it's
+          an immediate action rather than an editable field. */}
+      <div className="settings-card">
+        <h2 className="settings-card__title">Google account</h2>
+        <p className="settings-card__hint">
+          Connecting happens automatically the first time you save an invoice PDF to Google Drive.
+        </p>
+        <div className="hub-page__head-actions">
+          {googleDisconnected && <span className="settings-saved-badge">✓ Disconnected</span>}
+          <button type="button" className="btn btn--ghost" onClick={handleDisconnectGoogle}>
+            Disconnect Google account
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
