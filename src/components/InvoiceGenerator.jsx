@@ -148,6 +148,9 @@ export default function InvoiceGenerator({
             </h1>
             <p className="editor__subtitle">Changes save automatically in this browser.</p>
           </div>
+        </header>
+
+        <div className="editor__preview-toggle-row">
           <button
             type="button"
             className="btn btn--ghost btn--sm editor__preview-toggle"
@@ -156,7 +159,7 @@ export default function InvoiceGenerator({
           >
             {mobileView === "preview" ? "← Back to edit" : (<><EyeIcon /> Preview</>)}
           </button>
-        </header>
+        </div>
 
         <div className="editor__scroll">
           <InvoiceForm
@@ -174,7 +177,7 @@ export default function InvoiceGenerator({
           />
 
           <footer className="editor__footer">
-            {/* Save to hub */}
+            {/* Save + preview */}
             <div className="save-row">
               <button
                 type="button"
@@ -182,22 +185,18 @@ export default function InvoiceGenerator({
                 onClick={() => handleSave("draft")}
                 disabled={saveState === "saving"}
               >
-                {saveState === "saving" ? "Saving…" : saveState === "saved" ? "✓ Saved" : "Save draft"}
+                {saveState === "saving" ? "Saving…" : saveState === "saved" ? "✓ Saved" : "Save"}
               </button>
               <button
                 type="button"
                 className="btn btn--ghost"
-                onClick={() => {
-                  if (!window.confirm("Mark this invoice as sent and save it?")) return;
-                  handleSave("sent");
-                }}
-                disabled={saveState === "saving"}
+                onClick={() => setMobileView((v) => (v === "editor" ? "preview" : "editor"))}
               >
-                Save as sent
+                {mobileView === "preview" ? "← Back to edit" : "Preview"}
               </button>
             </div>
 
-            {/* Download PDF */}
+            {/* Export */}
             <DownloadPDFButton invoice={invoice} exportPdf={exportPdf} />
 
             {/* Save to Drive */}

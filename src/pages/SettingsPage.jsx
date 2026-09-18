@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { listTemplates, saveTemplate, createTemplate, duplicateTemplate, deleteTemplate } from "../lib/templates.js";
+import { listTeam, addTeamMember, removeTeamMember } from "../lib/team.js";
 import { revokeToken } from "../lib/googleAuth.js";
+import { CloseIcon } from "../components/icons.jsx";
 
 export default function SettingsPage() {
   const [templates, setTemplates] = useState(() => listTemplates());
@@ -9,6 +11,19 @@ export default function SettingsPage() {
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [googleDisconnected, setGoogleDisconnected] = useState(false);
+  const [team, setTeam] = useState(() => listTeam());
+  const [newMember, setNewMember] = useState("");
+
+  function handleAddMember(e) {
+    e.preventDefault();
+    setTeam(addTeamMember(newMember));
+    setNewMember("");
+  }
+
+  function handleRemoveMember(name) {
+    if (!window.confirm(`Remove ${name} from the team?`)) return;
+    setTeam(removeTeamMember(name));
+  }
 
   const selected = templates.find((t) => t.id === selectedId) ?? templates[0];
 
@@ -197,6 +212,38 @@ export default function SettingsPage() {
           )}
         </div>
       </form>
+
+      {/* Team — who jobs can be assigned to. Independent of templates. */}
+      <div className="settings-card">
+        <h2 className="settings-card__title">Team</h2>
+        <p className="settings-card__hint">People jobs can be assigned to, from the Jobs page.</p>
+        {team.length > 0 && (
+          <div className="tag-pills" style={{ marginBottom: 16 }}>
+            {team.map((name) => (
+              <span className="tag-pill" key={name} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                {name}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveMember(name)}
+                  aria-label={`Remove ${name}`}
+                  style={{ background: "none", border: 0, cursor: "pointer", color: "inherit", padding: 0, display: "inline-flex" }}
+                >
+                  <CloseIcon />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <form onSubmit={handleAddMember} className="field-row">
+          <input
+            className="input"
+            value={newMember}
+            onChange={(e) => setNewMember(e.target.value)}
+            placeholder="Add a team member's name"
+          />
+          <button type="submit" className="btn btn--ghost">Add</button>
+        </form>
+      </div>
 
       {/* Integrations — not part of the save/cancel form above, since it's
           an immediate action rather than an editable field. */}

@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { listClients, saveClient, deleteClient, listInvoices } from "../lib/db.js";
 import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
 import TagInput from "../components/TagInput.jsx";
-import { SearchIcon, SortIcon } from "../components/icons.jsx";
+import Modal from "../components/Modal.jsx";
+import { SearchIcon, SortIcon, StarIcon } from "../components/icons.jsx";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 
@@ -20,12 +21,15 @@ const SORT_OPTIONS = [
 function sortClients(clients, allStats, sortBy) {
   const copy = [...clients];
   switch (sortBy) {
-    case "name-desc": return copy.sort((a, b) => (b.name ?? "").localeCompare(a.name ?? ""));
-    case "total-desc": return copy.sort((a, b) => (allStats[b.id]?.total || 0) - (allStats[a.id]?.total || 0));
-    case "total-asc": return copy.sort((a, b) => (allStats[a.id]?.total || 0) - (allStats[b.id]?.total || 0));
-    case "invoices-desc": return copy.sort((a, b) => (allStats[b.id]?.count || 0) - (allStats[a.id]?.count || 0));
-    default: return copy.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    case "name-desc": copy.sort((a, b) => (b.name ?? "").localeCompare(a.name ?? "")); break;
+    case "total-desc": copy.sort((a, b) => (allStats[b.id]?.total || 0) - (allStats[a.id]?.total || 0)); break;
+    case "total-asc": copy.sort((a, b) => (allStats[a.id]?.total || 0) - (allStats[b.id]?.total || 0)); break;
+    case "invoices-desc": copy.sort((a, b) => (allStats[b.id]?.count || 0) - (allStats[a.id]?.count || 0)); break;
+    default: copy.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
   }
+  // Favorites always float to the top, regardless of the chosen sort.
+  copy.sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
+  return copy;
 }
 
 export default function ClientsPage() {
@@ -89,6 +93,11 @@ export default function ClientsPage() {
     load();
   }
 
+  function toggleFavorite(client) {
+    saveClient({ ...client, favorite: !client.favorite });
+    load();
+  }
+
   const filtered = sortClients(
     clients.filter((c) => {
       const q = search.toLowerCase();
@@ -112,12 +121,9 @@ export default function ClientsPage() {
         </button>
       </div>
 
-      {/* Inline add/edit form */}
+      {/* Add/edit modal */}
       {editingId !== null && (
-        <div className="client-form-card">
-          <h3 className="client-form-card__title">
-            {editingId === "new" ? "New client" : "Edit client"}
-          </h3>
+        <Modal title={editingId === "new" ? "New client" : "Edit client"} onClose={cancelEdit}>
           <form onSubmit={handleSave}>
             <div className="field-row">
               <div className="field">
@@ -149,9 +155,26 @@ export default function ClientsPage() {
                 />
               </div>
             </div>
+            <div className="field-row">
+              <div className="field">
+                <label className="field__label">Website</label>
+                <input className="input" type="url" placeholder="https://…" value={form.website}
+                  onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} />
+              </div>
+              <div className="field">
+                <label className="field__label">Social channels</label>
+                <input className="input" placeholder="@handle or links, comma separated" value={form.social}
+                  onChange={(e) => setForm((f) => ({ ...f, social: e.target.value }))} />
+              </div>
+            </div>
             <div className="field">
               <label className="field__label">Tags</label>
               <TagInput tags={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
+            </div>
+            <div className="field">
+              <label className="field__label">Notes</label>
+              <textarea className="input settings-textarea" rows={3} value={form.notes}
+                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
             </div>
             <div className="form-actions">
               <button type="submit" className="btn btn--primary">
@@ -160,7 +183,7 @@ export default function ClientsPage() {
               <button type="button" className="btn btn--ghost" onClick={cancelEdit}>Cancel</button>
             </div>
           </form>
-        </div>
+        </Modal>
       )}
 
       {/* Toolbar */}
@@ -204,6 +227,7 @@ export default function ClientsPage() {
           <table className="inv-table">
             <thead>
               <tr>
+                <th></th>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -218,6 +242,18 @@ export default function ClientsPage() {
                 const stats = allStats[c.id] || { count: 0, total: 0, lastDate: null };
                 return (
                   <tr key={c.id}>
+                    <td>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => toggleFavorite(c)}
+                        title={c.favorite ? "Unfavorite" : "Favorite"}
+                        aria-label={c.favorite ? `Unfavorite ${c.name}` : `Favorite ${c.name}`}
+                        style={{ color: c.favorite ? "#C9AE7C" : undefined }}
+                      >
+                        <StarIcon filled={!!c.favorite} />
+                      </button>
+                    </td>
                     <td>
                       <Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link>
                       {c.tags?.length > 0 && (
@@ -265,7 +301,10 @@ export default function ClientsPage() {
 }
 
 function emptyForm() {
-  return { name: "", email: "", phone: "", address1: "", address2: "", tags: [] };
+  return {
+    name: "", email: "", phone: "", address1: "", address2: "",
+    website: "", social: "", tags: [], notes: "", favorite: false,
+  };
 }
 
 function PencilIcon() {

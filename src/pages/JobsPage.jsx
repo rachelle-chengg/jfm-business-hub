@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { listJobs, saveJob, deleteJob, updateJobStatus, JOB_STATUSES, JOB_STATUS_LABEL } from "../lib/jobs.js";
 import { listClients } from "../lib/db.js";
+import { listTeam } from "../lib/team.js";
 import { formatShortDate } from "../lib/dates.js";
 import Modal from "../components/Modal.jsx";
 import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
@@ -40,6 +41,7 @@ export default function JobsPage() {
   const [form, setForm] = useState(emptyForm());
   const [tabMenuOpen, setTabMenuOpen] = useState(false);
   const tabMenuRef = useRef(null);
+  const team = listTeam();
 
   function load() {
     setJobs(listJobs());
@@ -170,9 +172,22 @@ export default function JobsPage() {
             </div>
             <div className="field">
               <label className="field__label">Assigned to</label>
-              <input className="input" value={form.assignedTo}
-                onChange={(e) => setForm((f) => ({ ...f, assignedTo: e.target.value }))}
-                placeholder="e.g. Jonathan, or a second shooter's name" />
+              {team.length > 0 ? (
+                <select className="input" value={form.assignedTo}
+                  onChange={(e) => setForm((f) => ({ ...f, assignedTo: e.target.value }))}>
+                  <option value="">Unassigned</option>
+                  {team.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input className="input" value={form.assignedTo}
+                    onChange={(e) => setForm((f) => ({ ...f, assignedTo: e.target.value }))}
+                    placeholder="e.g. Jonathan, or a second shooter's name" />
+                  <p className="field__hint">Add team members in Settings to pick from a dropdown instead.</p>
+                </>
+              )}
             </div>
             <label className="toggle">
               <input type="checkbox" checked={!!form.droneRequired}

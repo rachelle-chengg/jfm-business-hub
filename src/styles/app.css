@@ -69,10 +69,17 @@ body {
 }
 
 /* Only useful below 900px, where the editor and preview stack instead of
-   showing side by side — on desktop both are already visible at once. */
+   showing side by side — on desktop both are already visible at once.
+   Sits in its own row directly under the header bar, not inside it. */
+.editor__preview-toggle-row { display: none; }
 .editor__preview-toggle { display: none; }
 
 @media (max-width: 900px) {
+  .editor__preview-toggle-row {
+    display: block;
+    padding: 12px 28px;
+    border-bottom: 1px solid var(--ui-line);
+  }
   .editor__preview-toggle { display: inline-flex; }
 }
 
@@ -1055,17 +1062,11 @@ select.input {
 
 /* Search always takes its own full row; filter/sort sit on the row below it. */
 .toolbar__search,
-.search-field { flex: 1 1 100%; min-width: 0; }
+.search-field { flex: 1 1 100%; min-width: 0; position: relative; }
 .toolbar__sort,
-.select-field { flex: 0 0 auto; width: auto; }
+.select-field { flex: 0 0 auto; width: auto; position: relative; }
 
-.toolbar__search { flex: 1; min-width: 180px; }
-.toolbar__sort { width: auto; min-width: 160px; flex-shrink: 0; cursor: pointer; }
-
-/* Search / select fields with a leading icon */
-
-.search-field { position: relative; flex: 1; min-width: 180px; }
-.select-field { position: relative; flex-shrink: 0; }
+.toolbar__sort { min-width: 160px; cursor: pointer; }
 
 .search-field svg,
 .select-field svg {

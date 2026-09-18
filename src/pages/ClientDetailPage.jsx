@@ -6,6 +6,7 @@ import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 import { StatusBadge } from "./HubPage.jsx";
 import TagInput from "../components/TagInput.jsx";
+import { StarIcon } from "../components/icons.jsx";
 
 export default function ClientDetailPage() {
   const { id } = useParams();
@@ -50,12 +51,28 @@ export default function ClientDetailPage() {
     setClient((c) => ({ ...c, tags }));
   }
 
+  function toggleFavorite() {
+    const favorite = !client.favorite;
+    saveClient({ ...client, favorite });
+    setClient((c) => ({ ...c, favorite }));
+  }
+
   return (
     <div className="hub-page">
       <Link to="/clients" className="editor__back">← Back to clients</Link>
       <div className="hub-page__head">
         <h1 className="hub-page__title">{client.name}</h1>
         <div className="hub-page__head-actions">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={toggleFavorite}
+            title={client.favorite ? "Unfavorite" : "Favorite"}
+            aria-label={client.favorite ? "Unfavorite this client" : "Favorite this client"}
+            style={{ color: client.favorite ? "#C9AE7C" : undefined }}
+          >
+            <StarIcon filled={!!client.favorite} />
+          </button>
           <button type="button" className="btn btn--danger btn--sm" onClick={handleDelete}>Delete</button>
         </div>
       </div>
@@ -80,6 +97,22 @@ export default function ClientDetailPage() {
             <span className="field__label">Address</span>
             <div className="settings-readonly">{client.address1 || "—"}</div>
           </div>
+          <div className="field-row">
+            <div className="field">
+              <span className="field__label">Website</span>
+              <div className="settings-readonly">{client.website || "—"}</div>
+            </div>
+            <div className="field">
+              <span className="field__label">Social channels</span>
+              <div className="settings-readonly">{client.social || "—"}</div>
+            </div>
+          </div>
+          {client.notes && (
+            <div className="field">
+              <span className="field__label">Notes</span>
+              <div className="settings-readonly settings-readonly--pre">{client.notes}</div>
+            </div>
+          )}
           <div className="field">
             <span className="field__label">Tags</span>
             <TagInput tags={client.tags || []} onChange={updateTags} />
