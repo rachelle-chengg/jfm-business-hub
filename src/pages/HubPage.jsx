@@ -6,6 +6,7 @@ import { buildReminders } from "../lib/reminders.js";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate, todayISO, addDays } from "../lib/dates.js";
 import { loadSettings } from "../lib/settings.js";
+import { DocumentIcon } from "../components/icons.jsx";
 
 const STATUS_LABEL = { draft: "Draft", sent: "Sent", paid: "Paid", overdue: "Overdue" };
 const AVATAR_COLORS = ["#2C3930", "#35507D", "#9A4632", "#6B6B6B", "#5B4636", "#4A5D52"];
@@ -189,14 +190,14 @@ export default function HubPage() {
       </div>
       */}
 
-      {/* Dashboard actions — icon + label, like a banking app's quick actions */}
+      {/* Dashboard actions — rounded-square buttons, icon + label together */}
       <div className="dash-actions">
         <Link to="/jobs" className="dash-action dash-action--primary">
-          <span className="dash-action__icon"><PlusIcon /></span>
+          <PlusIcon />
           <span>Add Job</span>
         </Link>
         <Link to="/invoices/new" className="dash-action dash-action--secondary">
-          <span className="dash-action__icon"><DocumentIcon /></span>
+          <DocumentIcon />
           <span>Add Invoice</span>
         </Link>
       </div>
@@ -299,15 +300,4 @@ function EyeIcon({ open }) {
 
 function PlusIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
-}
-
-function DocumentIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="8" y1="13" x2="16" y2="13" />
-      <line x1="8" y1="17" x2="13" y2="17" />
-    </svg>
-  );
 }

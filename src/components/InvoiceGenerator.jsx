@@ -25,7 +25,6 @@ export default function InvoiceGenerator({
     return loadDraft() ?? createInvoice({ invoiceNumber: DEFAULT_INVOICE_NUMBER });
   });
   const [mobileView, setMobileView] = useState("editor");
-  const [mobilePreview, setMobilePreview] = useState(false);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
   const [driveState, setDriveState] = useState("idle"); // idle | uploading | done | error
 
@@ -125,95 +124,75 @@ export default function InvoiceGenerator({
           <button
             type="button"
             className="btn btn--ghost btn--sm"
-            onClick={() => setMobilePreview((v) => !v)}
-            aria-pressed={mobilePreview}
+            onClick={() => setMobileView((v) => (v === "editor" ? "preview" : "editor"))}
+            aria-pressed={mobileView === "preview"}
           >
-            <EyeIcon /> {mobilePreview ? "Desktop preview" : "Mobile preview"}
+            {mobileView === "preview" ? "← Back to edit" : (<><EyeIcon /> Preview</>)}
           </button>
         </header>
 
-        <InvoiceForm
-          invoice={invoice}
-          onUpdate={update}
-          onUpdateClient={updateClient}
-          onUpdateTax={updateTax}
-          onUpdateAdjustment={updateAdjustment}
-          onSetDateIssued={setDateIssued}
-          onSetDueDate={setDueDate}
-          onResetDueDate={resetDueDate}
-          onSetItems={setItems}
-        />
+        <div className="editor__scroll">
+          <InvoiceForm
+            invoice={invoice}
+            onUpdate={update}
+            onUpdateClient={updateClient}
+            onUpdateTax={updateTax}
+            onUpdateAdjustment={updateAdjustment}
+            onSetDateIssued={setDateIssued}
+            onSetDueDate={setDueDate}
+            onResetDueDate={resetDueDate}
+            onSetItems={setItems}
+          />
 
-        <footer className="editor__footer">
-          {/* Save to hub */}
-          <div className="save-row">
+          <footer className="editor__footer">
+            {/* Save to hub */}
+            <div className="save-row">
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => handleSave("draft")}
+                disabled={saveState === "saving"}
+              >
+                {saveState === "saving" ? "Saving…" : saveState === "saved" ? "✓ Saved" : "Save draft"}
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => {
+                  if (!window.confirm("Mark this invoice as sent and save it?")) return;
+                  handleSave("sent");
+                }}
+                disabled={saveState === "saving"}
+              >
+                Save as sent
+              </button>
+            </div>
+
+            {/* Download PDF */}
+            <DownloadPDFButton invoice={invoice} exportPdf={exportPdf} />
+
+            {/* Save to Drive */}
             <button
               type="button"
-              className="btn btn--ghost"
-              onClick={() => handleSave("draft")}
-              disabled={saveState === "saving"}
+              className="btn btn--ghost btn--block"
+              onClick={handleSaveToDrive}
+              disabled={driveState === "uploading"}
             >
-              {saveState === "saving" ? "Saving…" : saveState === "saved" ? "✓ Saved" : "Save draft"}
+              {driveState === "uploading"
+                ? "Uploading to Drive…"
+                : driveState === "done"
+                ? "✓ Saved to Drive"
+                : driveState === "error"
+                ? "Drive upload failed — try again"
+                : "Save PDF to Google Drive"}
             </button>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => {
-                if (!window.confirm("Mark this invoice as sent and save it?")) return;
-                handleSave("sent");
-              }}
-              disabled={saveState === "saving"}
-            >
-              Save as sent
-            </button>
-          </div>
-
-          {/* Download PDF */}
-          <DownloadPDFButton invoice={invoice} exportPdf={exportPdf} />
-
-          {/* Save to Drive */}
-          <button
-            type="button"
-            className="btn btn--ghost btn--block"
-            onClick={handleSaveToDrive}
-            disabled={driveState === "uploading"}
-          >
-            {driveState === "uploading"
-              ? "Uploading to Drive…"
-              : driveState === "done"
-              ? "✓ Saved to Drive"
-              : driveState === "error"
-              ? "Drive upload failed — try again"
-              : "Save PDF to Google Drive"}
-          </button>
-          <p className="download__hint">Requires connecting your Google account on first use.</p>
-        </footer>
+            <p className="download__hint">Requires connecting your Google account on first use.</p>
+          </footer>
+        </div>
       </aside>
 
-      <main className={`stage${mobilePreview ? " stage--mobile-frame" : ""}`}>
-        {/* Mobile-only toggle lives on the preview panel */}
-        <button
-          type="button"
-          className="btn btn--ghost preview-toggle stage-preview-toggle"
-          onClick={() => setMobileView((v) => (v === "editor" ? "preview" : "editor"))}
-          aria-label={mobileView === "editor" ? "Preview invoice" : "Back to edit"}
-        >
-          {mobileView === "preview" ? (
-            "← Back to edit"
-          ) : (
-            <>
-              <EyeIcon />
-              &nbsp;Preview
-            </>
-          )}
-        </button>
-        {mobilePreview ? (
-          <div className="stage__mobile-frame">
-            <InvoicePreview invoice={invoice} totals={totals} />
-          </div>
-        ) : (
-          <InvoicePreview invoice={invoice} totals={totals} />
-        )}
+      <main className="stage">
+        <InvoicePreview invoice={invoice} totals={totals} />
       </main>
     </div>
   );

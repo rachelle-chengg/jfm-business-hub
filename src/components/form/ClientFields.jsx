@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Field from "./Field.jsx";
+import { listClients } from "../../lib/db.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ClientFields({ client, onChange }) {
   const [emailTouched, setEmailTouched] = useState(false);
+  const [savedClients, setSavedClients] = useState([]);
+
+  useEffect(() => { setSavedClients(listClients()); }, []);
 
   const bind = (key, extra = {}) => ({
     id: `client-${key}`,
@@ -15,9 +19,38 @@ export default function ClientFields({ client, onChange }) {
 
   const emailInvalid = emailTouched && client.email && !EMAIL_RE.test(client.email);
 
+  function handlePickClient(e) {
+    const id = e.target.value;
+    e.target.value = ""; // reset the picker itself; it's an action, not a bound field
+    if (!id) return;
+    const c = savedClients.find((sc) => sc.id === id);
+    if (!c) return;
+    onChange({
+      name: c.name || "",
+      address1: c.address1 || "",
+      address2: c.address2 || "",
+      phone: c.phone || "",
+      email: c.email || "",
+    });
+  }
+
   return (
     <section className="form__section">
       <h2 className="form__heading">Client</h2>
+      {savedClients.length > 0 && (
+        <Field
+          label="Autofill from an existing client"
+          id="client-picker"
+          hint="Optional — pick a saved client to fill in the fields below, or type them from scratch."
+        >
+          <select className="input" id="client-picker" defaultValue="" onChange={handlePickClient}>
+            <option value="">Start from scratch…</option>
+            {savedClients.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </Field>
+      )}
       <Field label="Company or client name" id="client-name">
         <input className="input" type="text" autoComplete="organization" {...bind("name")} />
       </Field>

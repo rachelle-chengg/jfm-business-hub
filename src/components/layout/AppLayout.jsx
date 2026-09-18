@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import { HomeIcon, CameraIcon, PersonIcon, DocumentIcon, GearIcon } from "../icons.jsx";
 
 const NAV_LINKS = [
-  { to: "/", end: true, label: "Dashboard" },
-  { to: "/jobs", label: "Jobs" },
-  { to: "/clients", label: "Clients" },
-  { to: "/invoices", label: "Invoices" },
-  { to: "/settings", label: "Settings" },
+  { to: "/", end: true, label: "Dashboard", Icon: HomeIcon },
+  { to: "/jobs", label: "Jobs", Icon: CameraIcon },
+  { to: "/clients", label: "Clients", Icon: PersonIcon },
+  { to: "/invoices", label: "Invoices", Icon: DocumentIcon },
+  { to: "/settings", label: "Settings", Icon: GearIcon },
 ];
 
 export default function AppLayout() {
@@ -33,7 +34,8 @@ export default function AppLayout() {
         <nav className="hub-sidebar__links">
           {NAV_LINKS.map((l) => (
             <NavLink key={l.to} to={l.to} end={l.end} className={sidebarClass}>
-              {l.label}
+              <l.Icon />
+              <span>{l.label}</span>
             </NavLink>
           ))}
         </nav>
@@ -55,7 +57,8 @@ export default function AppLayout() {
           <div className="hub-nav__dropdown">
             {NAV_LINKS.map((l) => (
               <NavLink key={l.to} to={l.to} end={l.end} className={dropClass} onClick={close}>
-                {l.label}
+                <l.Icon />
+                <span>{l.label}</span>
               </NavLink>
             ))}
           </div>

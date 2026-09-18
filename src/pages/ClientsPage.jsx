@@ -5,6 +5,8 @@ import { SearchIcon, SortIcon } from "../components/icons.jsx";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const SORT_OPTIONS = [
   { value: "name", label: "Name (A–Z)" },
   { value: "name-desc", label: "Name (Z–A)" },
@@ -31,6 +33,8 @@ export default function ClientsPage() {
   const [sortBy, setSortBy] = useState("name");
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm());
+  const [emailTouched, setEmailTouched] = useState(false);
+  const emailInvalid = emailTouched && form.email && !EMAIL_RE.test(form.email);
 
   function load() {
     setClients(listClients());
@@ -57,11 +61,13 @@ export default function ClientsPage() {
   function startEdit(client) {
     setForm({ ...emptyForm(), ...client });
     setEditingId(client.id);
+    setEmailTouched(false);
   }
 
   function startNew() {
     setForm(emptyForm());
     setEditingId("new");
+    setEmailTouched(false);
   }
 
   function cancelEdit() { setEditingId(null); }
@@ -120,8 +126,10 @@ export default function ClientsPage() {
               </div>
               <div className="field">
                 <label className="field__label">Email</label>
-                <input className="input" type="email" value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                <input className={`input${emailInvalid ? " input--error" : ""}`} type="email" value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  onBlur={() => setEmailTouched(true)} />
+                {emailInvalid && <p className="field__hint field__hint--error">Please enter a valid email address.</p>}
               </div>
             </div>
             <div className="field-row">

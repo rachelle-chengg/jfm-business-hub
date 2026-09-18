@@ -87,9 +87,19 @@ body {
   background: var(--ui-bg);
 }
 
-.form {
+/* Form + footer scroll together as one list — the footer is not pinned,
+   it's simply the last thing you reach when you scroll to the end. A flex
+   item with overflow needs min-height: 0 or it ignores flex:1 and expands
+   to fit its content instead of scrolling, which is what was happening here. */
+.editor__scroll {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.form {
   padding: 20px 24px 24px;
   background: var(--ui-stage);
   display: flex;
@@ -262,7 +272,7 @@ select.input {
   transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease;
 }
 
-.btn:active { transform: scale(0.98); }
+.btn:active:not(:disabled) { transform: scale(0.96); }
 
 .btn:focus-visible {
   outline: 2px solid var(--ui-accent);
@@ -271,13 +281,16 @@ select.input {
 
 .btn:disabled { opacity: 0.6; cursor: default; }
 
-/* Primary: auto width by default — add .btn--block for full-width */
+/* Primary: auto width by default — add .btn--block for full-width.
+   Hover lightens, active goes darker than the resting state — the two
+   states need to read as distinct, not just a slightly-different hover. */
 .btn--primary {
   color: var(--ui-accent-contrast);
   background: var(--ui-accent);
 }
 
 .btn--primary:hover:not(:disabled) { background: var(--ui-accent-hover); }
+.btn--primary:active:not(:disabled) { background: #000000; }
 
 .btn--ghost {
   color: var(--ui-text);
@@ -285,7 +298,8 @@ select.input {
   border-color: var(--ui-line-strong);
 }
 
-.btn--ghost:hover { background: #f7f7f5; }
+.btn--ghost:hover:not(:disabled) { background: var(--ui-stage); }
+.btn--ghost:active:not(:disabled) { background: var(--ui-line-strong); border-color: var(--ui-text); }
 
 /* Block modifier — makes any button full-width */
 .btn--block {
@@ -320,35 +334,9 @@ select.input {
 
 .stage { height: 100%; overflow: auto; padding: 32px; }
 
-/* Mobile preview — simulates a phone viewport so the invoice can be checked
-   at mobile width without leaving the desktop editor. InvoicePreview already
-   auto-scales to fit whatever container it's given (ResizeObserver), so this
-   only needs to constrain the frame — no change to the preview logic itself. */
-.stage--mobile-frame {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.stage__mobile-frame {
-  width: 390px;
-  max-width: 100%;
-  height: 700px;
-  max-height: calc(100vh - 120px);
-  border: 8px solid var(--ui-text);
-  border-radius: 36px;
-  overflow: hidden;
-  background: var(--ui-bg);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-}
-
-.preview-toggle { display: none; }
-
 /* Narrow screens: stack + toggle between editor and preview */
 
 @media (max-width: 900px) {
-  .preview-toggle { display: inline-flex; }
-
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
@@ -356,12 +344,11 @@ select.input {
   }
 
   .editor { height: auto; border-right: 0; border-bottom: 1px solid var(--ui-line); }
-  .form { overflow: visible; }
+  .editor__scroll { overflow: visible; }
   .stage { height: auto; padding: 16px; }
   .preview { height: auto; aspect-ratio: 8.5 / 11; }
 
-  .app--show-preview .form,
-  .app--show-preview .editor__footer { display: none; }
+  .app--show-preview .editor__scroll { display: none; }
   .app--show-preview .editor { border-bottom: 0; }
   .app--show-editor .stage { display: none; }
 }
@@ -447,6 +434,9 @@ select.input {
 }
 
 .hub-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 12px 12px;
   font-size: 13.5px;
   font-weight: 500;
@@ -455,6 +445,8 @@ select.input {
   text-decoration: none;
   transition: color 120ms ease, background 120ms ease;
 }
+
+.hub-sidebar__link svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 .hub-sidebar__link:hover { color: var(--ui-text); background: var(--ui-stage); }
 .hub-sidebar__link--active { color: var(--ui-text); background: var(--ui-stage); font-weight: 600; }
@@ -537,7 +529,9 @@ select.input {
 }
 
 .hub-nav__drop-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 12px 12px;
   font-size: 14px;
   font-weight: 500;
@@ -546,6 +540,8 @@ select.input {
   border-radius: var(--ui-radius);
   transition: background 120ms, color 120ms;
 }
+
+.hub-nav__drop-link svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 .hub-nav__drop-link:hover { color: var(--ui-text); background: var(--ui-stage); }
 .hub-nav__drop-link--active { color: var(--ui-text); background: var(--ui-stage); }
@@ -739,13 +735,14 @@ select.input {
 .hero-card__footer-value { font-weight: 600; }
 .hero-card__footer-sep { opacity: 0.4; }
 
-/* Dashboard actions — icon circle + label, like a banking app's quick
-   actions, keeping the primary/secondary distinction the two actions had
+/* Dashboard actions — bigger rounded-square buttons with the icon and label
+   both inside the same surface (not a small circle with a label floating
+   below it), keeping the primary/secondary distinction the two actions had
    when they were plain buttons. */
 
 .dash-actions {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   margin-bottom: 32px;
 }
 
@@ -753,34 +750,29 @@ select.input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: var(--ui-text);
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.dash-action__icon {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--ui-radius);
-  display: flex;
-  align-items: center;
   justify-content: center;
+  gap: 12px;
+  min-width: 104px;
+  padding: 24px 20px;
+  border-radius: 24px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
   transition: opacity 120ms ease, transform 80ms ease;
 }
 
-.dash-action__icon svg { width: 20px; height: 20px; }
+.dash-action svg { width: 24px; height: 24px; }
 
-.dash-action:hover .dash-action__icon { opacity: 0.85; }
-.dash-action:active .dash-action__icon { transform: scale(0.94); }
+.dash-action:hover { opacity: 0.88; }
+.dash-action:active { transform: scale(0.96); }
 
-.dash-action--primary .dash-action__icon {
+.dash-action--primary {
   background: var(--ui-accent);
   color: var(--ui-accent-contrast);
 }
 
-.dash-action--secondary .dash-action__icon {
+.dash-action--secondary {
   background: var(--ui-bg);
   border: 1px solid var(--ui-line-strong);
   color: var(--ui-text);
@@ -1139,9 +1131,9 @@ select.input {
 .status-badge {
   display: inline-flex;
   align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 11px;
+  height: 24px;
+  padding: 0 12px;
+  border-radius: var(--ui-radius);
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -1174,7 +1166,8 @@ select.input {
   border-color: transparent;
 }
 
-.btn--danger:hover { background: #fbeeed; border-color: var(--ui-danger); }
+.btn--danger:hover:not(:disabled) { background: #fbeeed; border-color: var(--ui-danger); }
+.btn--danger:active:not(:disabled) { background: #f0c9c1; }
 
 /* ==========================================================================
    Client form card
@@ -1343,14 +1336,6 @@ select.input {
 
 .btn--new:hover { background: #2E2E2C; }
 .btn--new:active { transform: scale(0.98); }
-
-/* Stage preview toggle */
-
-.stage-preview-toggle { display: none; gap: 8px; }
-
-@media (max-width: 900px) {
-  .stage-preview-toggle { display: inline-flex; margin-bottom: 12px; }
-}
 
 /* ==========================================================================
    Settings page
