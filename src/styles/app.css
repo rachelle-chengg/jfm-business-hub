@@ -76,8 +76,10 @@ body {
 
 @media (max-width: 900px) {
   .editor__preview-toggle-row {
-    display: block;
+    display: flex;
+    justify-content: flex-end;
     padding: 12px 28px;
+    background: var(--ui-stage);
     border-bottom: 1px solid var(--ui-line);
   }
   .editor__preview-toggle { display: inline-flex; }
