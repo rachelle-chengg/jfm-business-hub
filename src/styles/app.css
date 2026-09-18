@@ -611,14 +611,17 @@ select.input {
 
 /* Hub pages */
 
+/* Scales with the viewport and centers instead of sitting fixed-width and
+   flush-left, which on wide monitors left content hugging the left edge
+   with a huge, borderless gap of stage background next to it — the content
+   and the empty space read as one undifferentiated area instead of a
+   deliberate column. */
 .hub-page {
-  max-width: 960px;
-  margin: 0;
+  max-width: clamp(960px, 70vw, 1400px);
+  margin: 0 auto;
   padding: 32px 24px 64px;
 }
 
-/* Scales with the viewport instead of sitting fixed at 680px, which left a
-   huge empty gap on wide monitors — grows up to 1100px, no wider. */
 .hub-page--dashboard { max-width: clamp(680px, 55vw, 1100px); }
 
 .hub-page__head {
