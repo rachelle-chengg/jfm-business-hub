@@ -44,3 +44,23 @@ Use when: you want to be able to explain *why* something looks the way it does
 later, not just what it looks like now.
 
 > Keep a running design decision log as we work — a markdown file, one entry per decision, each with what changed, what was decided and why, any failed attempts and what was learned from them, and specific values confirmed (hex codes, px, font names). Update it after every design decision or revision without me having to ask, and don't just describe the final state — capture the reasoning and anything that didn't work along the way.
+
+---
+
+## Set up every new coding project the same way
+
+Use when: starting any new project, to get self-maintaining docs and a visible
+git history from day one instead of requesting each piece separately. Best
+saved into a `CLAUDE.md` at the project root (loads automatically every
+session) rather than pasted into chat each time.
+
+Note: point 4 deliberately overrides the normal "only commit when asked"
+default — that's what makes it work, but it means proactive `git push` in any
+project this is dropped into.
+
+> Set this project up with three living docs and a visible version history from day one, and keep maintaining them without me having to ask each time:
+>
+> 1. **design-system.md** — the current design tokens (colors with hex values and *why* each was chosen, typography roles, icon/shape rules, the signature element, responsive breakpoints). Update it whenever a design decision changes — it should always reflect the current state, not a one-time snapshot.
+> 2. **design-log.md** — a running decision journal, one entry per decision/revision/failure: what changed, what was decided and why, what was tried and didn't work (if anything), and specific values confirmed (hex, px, font, copy). Add an entry after every design decision automatically, not just when I ask.
+> 3. **prompt-guide.md** — reusable prompts that worked well on this project, written so I can paste them into a different project later. Add one whenever something works particularly well, or whenever I say "save that as a prompt."
+> 4. **Git history as a visible record of progress** — commit and push to GitHub after each meaningful milestone (a feature working, a design pass finished, a checkpoint I'd want to look back on), not only when I explicitly ask. Each commit message should explain what changed and why, so the history itself tells the story of how the project evolved.
