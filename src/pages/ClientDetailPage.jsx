@@ -86,7 +86,9 @@ export default function ClientDetailPage() {
           <div className="field-row">
             <div className="field">
               <span className="field__label">Email</span>
-              <div className="settings-readonly">{client.email || "—"}</div>
+              <div className="settings-readonly">
+                {client.email ? <a className="link" href={`mailto:${client.email}`}>{client.email}</a> : "—"}
+              </div>
             </div>
             <div className="field">
               <span className="field__label">Phone</span>

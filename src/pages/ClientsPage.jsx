@@ -4,9 +4,10 @@ import { listClients, saveClient, deleteClient, listInvoices } from "../lib/db.j
 import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
 import TagInput from "../components/TagInput.jsx";
 import Modal from "../components/Modal.jsx";
-import { SearchIcon, SortIcon, StarIcon } from "../components/icons.jsx";
+import { SearchIcon, SortIcon, FilterIcon, StarIcon } from "../components/icons.jsx";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
+import { effectiveStatus } from "../lib/db.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -32,15 +33,57 @@ function sortClients(clients, allStats, sortBy) {
   return copy;
 }
 
+const ALL_COLUMNS = {
+  name: { label: "Name", width: 220 },
+  email: { label: "Email", width: 220 },
+  phone: { label: "Phone", width: 140 },
+  tags: { label: "Tags", width: 220 },
+  invoices: { label: "Invoices", width: 90 },
+  total: { label: "Total billed", width: 130 },
+  last: { label: "Last invoice", width: 120 },
+};
+const DEFAULT_COLUMN_ORDER = ["name", "email", "phone", "tags", "invoices", "total", "last"];
+const COLUMN_ORDER_KEY = "jfm-clients-columns-v1";
+
+function loadColumnOrder() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(COLUMN_ORDER_KEY) || "null");
+    if (!Array.isArray(raw)) return DEFAULT_COLUMN_ORDER;
+    const known = raw.filter((k) => ALL_COLUMNS[k]);
+    const missing = DEFAULT_COLUMN_ORDER.filter((k) => !known.includes(k));
+    return [...known, ...missing];
+  } catch {
+    return DEFAULT_COLUMN_ORDER;
+  }
+}
+
 export default function ClientsPage() {
   const [clients, setClients] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("name");
+  const [favoriteFilter, setFavoriteFilter] = useState("all");
+  const [balanceFilter, setBalanceFilter] = useState("all");
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [emailTouched, setEmailTouched] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [columnOrder, setColumnOrder] = useState(loadColumnOrder);
+  const [dragKey, setDragKey] = useState(null);
   const emailInvalid = emailTouched && form.email && !EMAIL_RE.test(form.email);
+
+  useEffect(() => {
+    localStorage.setItem(COLUMN_ORDER_KEY, JSON.stringify(columnOrder));
+  }, [columnOrder]);
+
+  function moveColumn(fromKey, toKey) {
+    if (!fromKey || fromKey === toKey) return;
+    setColumnOrder((order) => {
+      const next = order.filter((k) => k !== fromKey);
+      next.splice(next.indexOf(toKey), 0, fromKey);
+      return next;
+    });
+  }
 
   function load() {
     setClients(listClients());
@@ -56,8 +99,11 @@ export default function ClientsPage() {
         (inv) => inv.clientId === c.id || inv.client?.name === c.name
       );
       const total = related.reduce((s, i) => s + (i.total || 0), 0);
+      const outstanding = related
+        .filter((inv) => ["sent", "overdue"].includes(effectiveStatus(inv)))
+        .reduce((s, i) => s + (i.total || 0), 0);
       const last = [...related].sort((a, b) => (b.dateIssued ?? "").localeCompare(a.dateIssued ?? ""))[0];
-      map[c.id] = { count: related.length, total, lastDate: last?.dateIssued ?? null };
+      map[c.id] = { count: related.length, total, outstanding, lastDate: last?.dateIssued ?? null };
     }
     return map;
   }
@@ -81,7 +127,6 @@ export default function ClientsPage() {
   function handleSave(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
-    if (!window.confirm(editingId === "new" ? "Add this client?" : `Save changes to ${form.name}?`)) return;
     saveClient({ ...form, id: editingId === "new" ? undefined : editingId });
     setEditingId(null);
     load();
@@ -98,15 +143,63 @@ export default function ClientsPage() {
     load();
   }
 
+  function updateClient(id, patch) {
+    setClients((prev) => {
+      const next = prev.map((c) => (c.id === id ? { ...c, ...patch } : c));
+      saveClient(next.find((c) => c.id === id));
+      return next;
+    });
+  }
+
+  function renderCell(key, c, stats) {
+    switch (key) {
+      case "name":
+        return editMode ? (
+          <input className="input" value={c.name}
+            onChange={(e) => updateClient(c.id, { name: e.target.value })} />
+        ) : (
+          <Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link>
+        );
+      case "email":
+        return editMode ? (
+          <input className="input" type="email" value={c.email || ""}
+            onChange={(e) => updateClient(c.id, { email: e.target.value })} />
+        ) : c.email ? (
+          <a className="link" href={`mailto:${c.email}`}>{c.email}</a>
+        ) : "—";
+      case "phone":
+        return editMode ? (
+          <input className="input" value={c.phone || ""}
+            onChange={(e) => updateClient(c.id, { phone: e.target.value })} />
+        ) : (c.phone || "—");
+      case "tags":
+        return editMode ? (
+          <TagInput tags={c.tags || []} onChange={(tags) => updateClient(c.id, { tags })} />
+        ) : c.tags?.length > 0 ? (
+          <div className="tag-pills">{c.tags.map((t) => <span className="tag-pill" key={t}>{t}</span>)}</div>
+        ) : "—";
+      case "invoices":
+        return stats.count;
+      case "total":
+        return formatCurrency(stats.total);
+      case "last":
+        return stats.lastDate ? formatShortDate(stats.lastDate) : "—";
+      default:
+        return null;
+    }
+  }
+
   const filtered = sortClients(
     clients.filter((c) => {
       const q = search.toLowerCase();
-      return (
+      const matchSearch =
         !q ||
         (c.name || "").toLowerCase().includes(q) ||
         (c.email || "").toLowerCase().includes(q) ||
-        (c.phone || "").toLowerCase().includes(q)
-      );
+        (c.phone || "").toLowerCase().includes(q);
+      const matchFavorite = favoriteFilter === "all" || !!c.favorite;
+      const matchBalance = balanceFilter === "all" || (allStats[c.id]?.outstanding || 0) > 0;
+      return matchSearch && matchFavorite && matchBalance;
     }),
     allStats,
     sortBy
@@ -116,9 +209,18 @@ export default function ClientsPage() {
     <div className="hub-page">
       <div className="hub-page__head">
         <h1 className="hub-page__title">Clients</h1>
-        <button type="button" className="btn btn--primary" onClick={startNew}>
-          + Add Client
-        </button>
+        <div className="hub-page__head-actions">
+          <button
+            type="button"
+            className="btn btn--ghost btn--sm"
+            onClick={() => setEditMode((v) => !v)}
+          >
+            {editMode ? "Done editing" : "Edit"}
+          </button>
+          <button type="button" className="btn btn--primary" onClick={startNew}>
+            + Add Client
+          </button>
+        </div>
       </div>
 
       {/* Add/edit modal */}
@@ -199,6 +301,30 @@ export default function ClientsPage() {
           />
         </div>
         <div className="select-field">
+          <FilterIcon />
+          <select
+            className="input"
+            value={favoriteFilter}
+            onChange={(e) => setFavoriteFilter(e.target.value)}
+            aria-label="Filter by favorite"
+          >
+            <option value="all">All clients</option>
+            <option value="favorites">Favorites only</option>
+          </select>
+        </div>
+        <div className="select-field">
+          <FilterIcon />
+          <select
+            className="input"
+            value={balanceFilter}
+            onChange={(e) => setBalanceFilter(e.target.value)}
+            aria-label="Filter by outstanding balance"
+          >
+            <option value="all">Any balance</option>
+            <option value="outstanding">Outstanding balance</option>
+          </select>
+        </div>
+        <div className="select-field">
           <SortIcon />
           <select
             className="input"
@@ -215,8 +341,12 @@ export default function ClientsPage() {
 
       {filtered.length === 0 ? (
         <div className="empty-state">
-          <p>{search ? "No clients match your search." : "No clients yet."}</p>
-          {!search && (
+          <p>
+            {search || favoriteFilter !== "all" || balanceFilter !== "all"
+              ? "No clients match your search and filters."
+              : "No clients yet."}
+          </p>
+          {!search && favoriteFilter === "all" && balanceFilter === "all" && (
             <button type="button" className="btn btn--primary" onClick={startNew}>
               Add your first client
             </button>
@@ -224,17 +354,25 @@ export default function ClientsPage() {
         </div>
       ) : (
         <div className="inv-table-wrap">
-          <table className="inv-table">
+          <table className={`inv-table client-table${editMode ? " client-table--editing" : ""}`}>
             <thead>
               <tr>
                 <th></th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Invoices</th>
-                <th>Total billed</th>
-                <th>Last invoice</th>
-                <th>Actions</th>
+                {columnOrder.map((key) => (
+                  <th
+                    key={key}
+                    draggable
+                    onDragStart={(e) => { e.dataTransfer.setData("text/plain", key); e.dataTransfer.effectAllowed = "move"; setDragKey(key); }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => { moveColumn(dragKey, key); setDragKey(null); }}
+                    onDragEnd={() => setDragKey(null)}
+                    className="client-table__th--draggable"
+                    title="Drag to reorder columns"
+                  >
+                    {ALL_COLUMNS[key].label}
+                  </th>
+                ))}
+                {editMode && <th>Remove</th>}
               </tr>
             </thead>
             <tbody>
@@ -254,30 +392,21 @@ export default function ClientsPage() {
                         <StarIcon filled={!!c.favorite} />
                       </button>
                     </td>
-                    <td>
-                      <Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link>
-                      {c.tags?.length > 0 && (
-                        <div className="tag-pills" style={{ marginTop: 6 }}>
-                          {c.tags.map((t) => <span className="tag-pill" key={t}>{t}</span>)}
-                        </div>
-                      )}
-                    </td>
-                    <td>{c.email || "—"}</td>
-                    <td>{c.phone || "—"}</td>
-                    <td>{stats.count}</td>
-                    <td>{formatCurrency(stats.total)}</td>
-                    <td>{stats.lastDate ? formatShortDate(stats.lastDate) : "—"}</td>
-                    <td>
-                      <div className="row-actions">
-                        <button
-                          type="button"
-                          className="icon-btn icon-btn--edit"
-                          onClick={() => startEdit(c)}
-                          title="Edit client"
-                          aria-label={`Edit ${c.name}`}
-                        >
-                          <PencilIcon />
-                        </button>
+                    {columnOrder.map((key) => (
+                      <td
+                        key={key}
+                        style={editMode ? undefined : {
+                          maxWidth: ALL_COLUMNS[key].width,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {renderCell(key, c, stats)}
+                      </td>
+                    ))}
+                    {editMode && (
+                      <td>
                         <button
                           type="button"
                           className="icon-btn icon-btn--delete"
@@ -287,8 +416,8 @@ export default function ClientsPage() {
                         >
                           <TrashIcon />
                         </button>
-                      </div>
-                    </td>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -305,15 +434,6 @@ function emptyForm() {
     name: "", email: "", phone: "", address1: "", address2: "",
     website: "", social: "", tags: [], notes: "", favorite: false,
   };
-}
-
-function PencilIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-    </svg>
-  );
 }
 
 function TrashIcon() {
