@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 import InvoiceGenerator from "../components/InvoiceGenerator.jsx";
 import { getInvoice } from "../lib/db.js";
 
 export default function InvoiceEditorPage() {
   const { id } = useParams(); // undefined = new invoice
   const navigate = useNavigate();
+  const location = useLocation();
   const [initialInvoice, setInitialInvoice] = useState(undefined); // undefined = loading
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!id) {
-      setInitialInvoice(null); // null = create new
+      // A Job Detail page can hand off prefilled invoice data via navigation state
+      setInitialInvoice(location.state?.initialInvoice ?? null); // null = create new, blank
       return;
     }
     const inv = getInvoice(id);

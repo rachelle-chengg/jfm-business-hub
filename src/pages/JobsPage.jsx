@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { listJobs, saveJob, deleteJob, updateJobStatus, JOB_STATUSES, JOB_STATUS_LABEL } from "../lib/jobs.js";
 import { listClients } from "../lib/db.js";
 import { formatShortDate } from "../lib/dates.js";
@@ -186,7 +187,7 @@ export default function JobsPage() {
                     {job.time && <div className="inv-table__sub">{job.time}</div>}
                   </td>
                   <td>{job.clientName || "—"}</td>
-                  <td>{job.address}</td>
+                  <td><Link to={`/jobs/${job.id}`} className="link">{job.address}</Link></td>
                   <td>{job.package || "—"}</td>
                   <td>{job.droneRequired ? "Yes" : "—"}</td>
                   <td>

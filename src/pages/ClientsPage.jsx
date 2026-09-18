@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { listClients, saveClient, deleteClient, listInvoices } from "../lib/db.js";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
@@ -193,7 +194,7 @@ export default function ClientsPage() {
                 const stats = allStats[c.id] || { count: 0, total: 0, lastDate: null };
                 return (
                   <tr key={c.id}>
-                    <td><strong>{c.name}</strong></td>
+                    <td><Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link></td>
                     <td>{c.email || "—"}</td>
                     <td>{c.phone || "—"}</td>
                     <td>{stats.count}</td>
