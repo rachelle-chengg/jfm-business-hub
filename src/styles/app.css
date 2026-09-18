@@ -50,13 +50,19 @@ body {
 
 /* Editor column */
 
+/* A 1px border alone barely reads against the beige stage, especially on
+   wide screens where this panel is narrow against a lot of empty stage —
+   the shadow gives it real separation instead of blending in. */
 .editor {
   display: flex;
   flex-direction: column;
   height: 100%;
   background: var(--ui-bg);
   border-right: 1px solid var(--ui-line);
+  box-shadow: 6px 0 16px rgba(26, 26, 26, 0.08);
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 .editor__header {
@@ -624,8 +630,6 @@ select.input {
   margin: 0 auto;
   padding: 32px 24px 64px;
 }
-
-.hub-page--dashboard { max-width: clamp(680px, 55vw, 1100px); }
 
 .hub-page__head {
   display: flex;
