@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 
+const NAV_LINKS = [
+  { to: "/", end: true, label: "Dashboard" },
+  { to: "/jobs", label: "Jobs" },
+  { to: "/clients", label: "Clients" },
+  { to: "/invoices", label: "Invoices" },
+  { to: "/settings", label: "Settings" },
+];
+
 export default function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -19,38 +27,37 @@ export default function AppLayout() {
 
   return (
     <div className="hub">
+      {/* Desktop: persistent side navigation */}
+      <aside className="hub-sidebar">
+        <div className="hub-sidebar__brand">JFM Business Hub</div>
+        <nav className="hub-sidebar__links">
+          {NAV_LINKS.map((l) => (
+            <NavLink key={l.to} to={l.to} end={l.end} className={sidebarClass}>
+              {l.label}
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Mobile: top bar + hamburger dropdown */}
       <nav className="hub-nav" ref={menuRef}>
-        <span className="hub-nav__brand">Invoice Hub</span>
-
-        <div className="hub-nav__links">
-          <NavLink to="/" end className={navClass}>Dashboard</NavLink>
-          <NavLink to="/jobs" className={navClass}>Jobs</NavLink>
-          <NavLink to="/clients" className={navClass}>Clients</NavLink>
-          <NavLink to="/invoices" className={navClass}>Invoices</NavLink>
-          <NavLink to="/settings" className={navClass}>Settings</NavLink>
-        </div>
-
-        <div className="hub-nav__right">
-          <NavLink to="/invoices/new" className="hub-nav__cta">
-            + New Invoice
-          </NavLink>
-          <button
-            className={`hub-nav__hamburger${menuOpen ? " hub-nav__hamburger--open" : ""}`}
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label="Toggle menu"
-            aria-expanded={menuOpen}
-          >
-            <span /><span /><span />
-          </button>
-        </div>
+        <span className="hub-nav__brand">JFM Business Hub</span>
+        <button
+          className={`hub-nav__hamburger${menuOpen ? " hub-nav__hamburger--open" : ""}`}
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+        >
+          <span /><span /><span />
+        </button>
 
         {menuOpen && (
           <div className="hub-nav__dropdown">
-            <NavLink to="/" end className={dropClass} onClick={close}>Dashboard</NavLink>
-            <NavLink to="/jobs" className={dropClass} onClick={close}>Jobs</NavLink>
-            <NavLink to="/clients" className={dropClass} onClick={close}>Clients</NavLink>
-            <NavLink to="/invoices" className={dropClass} onClick={close}>Invoices</NavLink>
-            <NavLink to="/settings" className={dropClass} onClick={close}>Settings</NavLink>
+            {NAV_LINKS.map((l) => (
+              <NavLink key={l.to} to={l.to} end={l.end} className={dropClass} onClick={close}>
+                {l.label}
+              </NavLink>
+            ))}
           </div>
         )}
       </nav>
@@ -62,8 +69,8 @@ export default function AppLayout() {
   );
 }
 
-function navClass({ isActive }) {
-  return `hub-nav__link${isActive ? " hub-nav__link--active" : ""}`;
+function sidebarClass({ isActive }) {
+  return `hub-sidebar__link${isActive ? " hub-sidebar__link--active" : ""}`;
 }
 
 function dropClass({ isActive }) {
