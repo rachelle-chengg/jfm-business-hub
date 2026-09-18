@@ -86,6 +86,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.09in;
+  white-space: nowrap;
 }
 
 .sheet__footer-item svg {

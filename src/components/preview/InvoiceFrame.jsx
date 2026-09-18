@@ -16,17 +16,6 @@ export default function InvoiceFrame({ business }) {
           <MailIcon />
           {business.email}
         </a>
-        {business.website && (
-          <a
-            href={`https://${business.website}`}
-            className="sheet__footer-item sheet__footer-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <GlobeIcon />
-            {business.website}
-          </a>
-        )}
       </footer>
     </>
   );
@@ -55,11 +44,3 @@ function MailIcon() {
   );
 }
 
-function GlobeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  );
-}
