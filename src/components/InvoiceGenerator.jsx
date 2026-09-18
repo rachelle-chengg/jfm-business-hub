@@ -36,7 +36,9 @@ export default function InvoiceGenerator({
 }) {
   const [invoice, setInvoice] = useState(() => {
     if (initialInvoice) return withTemplateFallback({ ...initialInvoice });
-    return loadDraft() ?? createInvoice({ invoiceNumber: DEFAULT_INVOICE_NUMBER });
+    const draft = loadDraft();
+    if (draft) return withTemplateFallback(draft);
+    return createInvoice({ invoiceNumber: DEFAULT_INVOICE_NUMBER });
   });
   const [mobileView, setMobileView] = useState("editor");
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
