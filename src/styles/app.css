@@ -320,15 +320,20 @@ select.input {
 
 /* Buttons */
 
+/* Sizing scales up gently on wide screens (via clamp) — pages now stretch
+   up to 1400px, and buttons that stayed pinned at their laptop-width size
+   started looking small/lost against all the extra room. The clamp lower
+   bound matches the old fixed size exactly, so nothing changes below
+   ~1700px viewport width — this only kicks in on genuinely wide monitors. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px;
-  padding: 0 24px;
+  height: clamp(44px, 2.6vw, 52px);
+  padding: 0 clamp(24px, 1.6vw, 32px);
   font: inherit;
-  font-size: 13.5px;
+  font-size: clamp(13.5px, 0.85vw, 15px);
   font-weight: 500;
   border-radius: var(--ui-radius);
   border: 1px solid transparent;
@@ -823,23 +828,25 @@ select.input {
   margin-bottom: 32px;
 }
 
+/* Scales gently on wide screens for the same reason .btn does — see note
+   above it. Unchanged below ~1700px viewport width. */
 .dash-action {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  min-width: 104px;
-  padding: 24px 20px;
+  min-width: clamp(104px, 6.5vw, 152px);
+  padding: clamp(24px, 1.6vw, 34px) clamp(20px, 1.4vw, 28px);
   border-radius: 24px;
   text-decoration: none;
-  font-size: 13px;
+  font-size: clamp(13px, 0.8vw, 15px);
   font-weight: 600;
   text-align: center;
   transition: opacity 120ms ease, transform 80ms ease;
 }
 
-.dash-action svg { width: 24px; height: 24px; }
+.dash-action svg { width: clamp(24px, 1.4vw, 30px); height: clamp(24px, 1.4vw, 30px); }
 
 .dash-action:hover { opacity: 0.88; }
 .dash-action:active { transform: scale(0.96); }
