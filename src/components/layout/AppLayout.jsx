@@ -24,8 +24,9 @@ export default function AppLayout() {
 
         <div className="hub-nav__links">
           <NavLink to="/" end className={navClass}>Dashboard</NavLink>
-          <NavLink to="/invoices" className={navClass}>Invoices</NavLink>
+          <NavLink to="/jobs" className={navClass}>Jobs</NavLink>
           <NavLink to="/clients" className={navClass}>Clients</NavLink>
+          <NavLink to="/invoices" className={navClass}>Invoices</NavLink>
           <NavLink to="/settings" className={navClass}>Settings</NavLink>
         </div>
 
@@ -46,8 +47,9 @@ export default function AppLayout() {
         {menuOpen && (
           <div className="hub-nav__dropdown">
             <NavLink to="/" end className={dropClass} onClick={close}>Dashboard</NavLink>
-            <NavLink to="/invoices" className={dropClass} onClick={close}>Invoices</NavLink>
+            <NavLink to="/jobs" className={dropClass} onClick={close}>Jobs</NavLink>
             <NavLink to="/clients" className={dropClass} onClick={close}>Clients</NavLink>
+            <NavLink to="/invoices" className={dropClass} onClick={close}>Invoices</NavLink>
             <NavLink to="/settings" className={dropClass} onClick={close}>Settings</NavLink>
           </div>
         )}

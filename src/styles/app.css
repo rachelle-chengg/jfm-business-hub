@@ -3,18 +3,20 @@
    ========================================================================== */
 
 :root {
+  /* Brand palette — Mossed Stone / Polished Concrete / Cast Limestone / Beton Noir */
   --ui-bg: #FFFFFF;
-  --ui-stage: #F1F1F1;
-  --ui-text: #1C1C1C;
-  --ui-muted: #6b6b66;
-  --ui-line: #e4e4df;
-  --ui-line-strong: #c9c9c2;
-  --ui-accent: #647849;
-  --ui-accent-hover: #536339;
-  --ui-focus: rgba(100, 120, 73, 0.28);
-  --ui-danger: #b3261e;
-  --ui-font: "Montserrat", "Inter", system-ui, -apple-system, sans-serif;
-  --ui-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ui-stage: #E9E8E3;
+  --ui-text: #1A1A1A;
+  --ui-muted: #6B675C;
+  --ui-line: #EEEAE0;
+  --ui-line-strong: #DCD7C9;
+  --ui-accent: #2C3930;
+  --ui-accent-hover: #3F4D42;
+  --ui-focus: rgba(44, 57, 48, 0.28);
+  --ui-danger: #9A4632;
+  --ui-font: "Inter", system-ui, -apple-system, sans-serif;
+  --ui-font-display: "Space Grotesk", "Inter", sans-serif;
+  --ui-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --ui-radius: 6px;
   --editor-width: 420px;
 }
@@ -316,28 +318,28 @@ body {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ui-bg: #1c1c1a;
-    --ui-stage: #121211;
-    --ui-text: #ecece7;
-    --ui-muted: #9d9d95;
-    --ui-line: #2c2c29;
-    --ui-line-strong: #45453f;
-    --ui-focus: rgba(100, 120, 73, 0.35);
+    --ui-bg: #201F1C;
+    --ui-stage: #1A1A1A;
+    --ui-text: #E9E8E3;
+    --ui-muted: #A39C8C;
+    --ui-line: #2E2C28;
+    --ui-line-strong: #46433C;
+    --ui-focus: rgba(120, 150, 130, 0.35);
   }
   :root:not([data-theme="light"]) .input:disabled,
-  :root:not([data-theme="light"]) .btn--ghost:hover { background: #262624; }
-  :root:not([data-theme="light"]) .icon-btn:hover { background: #242422; }
-  :root:not([data-theme="light"]) .icon-btn--delete:hover { background: #3a2422; }
+  :root:not([data-theme="light"]) .btn--ghost:hover { background: #27251F; }
+  :root:not([data-theme="light"]) .icon-btn:hover { background: #262420; }
+  :root:not([data-theme="light"]) .icon-btn--delete:hover { background: #3A251F; }
 }
 
 :root[data-theme="dark"] {
-  --ui-bg: #1c1c1a;
-  --ui-stage: #121211;
-  --ui-text: #ecece7;
-  --ui-muted: #9d9d95;
-  --ui-line: #2c2c29;
-  --ui-line-strong: #45453f;
-  --ui-focus: rgba(100, 120, 73, 0.35);
+  --ui-bg: #201F1C;
+  --ui-stage: #1A1A1A;
+  --ui-text: #E9E8E3;
+  --ui-muted: #A39C8C;
+  --ui-line: #2E2C28;
+  --ui-line-strong: #46433C;
+  --ui-focus: rgba(120, 150, 130, 0.35);
 }
 
 /* ==========================================================================
@@ -506,9 +508,10 @@ body {
 
 .hub-page__title {
   margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--ui-font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* ==========================================================================
@@ -526,8 +529,9 @@ body {
 
 .dash-greeting__name {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-family: var(--ui-font-display);
+  font-size: 22px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
@@ -570,8 +574,8 @@ body {
 /* Hero card */
 
 .hero-card {
-  background: linear-gradient(140deg, #647849 0%, #3d5228 100%);
-  border-radius: 18px;
+  background: linear-gradient(135deg, #2C3930 0%, #23291F 55%, #1A1A1A 100%);
+  border-radius: 14px;
   padding: 28px 24px 22px;
   color: #fff;
   margin-bottom: 20px;
@@ -579,17 +583,19 @@ body {
   overflow: hidden;
 }
 
-.hero-card::before {
+/* Corner registration marks — the hub's signature device */
+.hero-card::before,
+.hero-card::after {
   content: "";
   position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.06);
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid rgba(233, 232, 227, 0.5);
   pointer-events: none;
 }
+
+.hero-card::before { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
+.hero-card::after { bottom: 14px; right: 14px; border-left: 0; border-top: 0; }
 
 .hero-card__label {
   font-size: 12.5px;
@@ -608,9 +614,11 @@ body {
 }
 
 .hero-card__amount {
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--ui-font-display);
+  font-size: 38px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
   line-height: 1;
 }
 
@@ -641,7 +649,7 @@ body {
   margin-bottom: 20px;
 }
 
-.hero-card__meta--warn { color: #fcd34d; opacity: 1; font-weight: 600; }
+.hero-card__meta--warn { color: #D9A88F; opacity: 1; font-weight: 600; }
 
 .hero-card__footer {
   display: flex;
@@ -695,7 +703,7 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: rgba(100, 120, 73, 0.1);
+  background: rgba(44, 57, 48, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -801,8 +809,8 @@ body {
 }
 
 .inv-list-item__amount--overdue { color: var(--ui-danger); }
-.inv-list-item__amount--paid { color: #15803d; }
-.inv-list-item__amount--sent { color: #1d4ed8; }
+.inv-list-item__amount--paid { color: #2C3930; }
+.inv-list-item__amount--sent { color: #35507D; }
 .inv-list-item__amount--draft { color: var(--ui-muted); }
 
 /* ==========================================================================
@@ -827,8 +835,40 @@ body {
   flex-wrap: wrap;
 }
 
-.reminder--overdue { background: #fff5f5; border-color: #fca5a5; }
-.reminder--soon { background: #fffbeb; border-color: #fcd34d; }
+.reminder--overdue { background: #F7EAE6; border-color: #C98671; }
+.reminder--soon { background: #F6F0DE; border-color: #C9AE7C; }
+.reminder--info { background: #EAEEF3; border-color: #9BB0D3; }
+
+/* Today's Schedule — job rows on the dashboard */
+.job-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.job-row:last-child { border-bottom: 0; }
+
+.job-row__time {
+  font-family: var(--ui-mono);
+  font-size: 12.5px;
+  color: var(--ui-muted);
+  width: 56px;
+  flex-shrink: 0;
+}
+
+.job-row__body { flex: 1; min-width: 0; }
+
+.job-row__address {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-row__sub { font-size: 12px; color: var(--ui-muted); margin-top: 2px; }
 
 .reminder__body {
   display: flex;
@@ -930,27 +970,27 @@ body {
 }
 
 .filter-tab--draft.filter-tab--active {
-  color: #4b5563;
-  border-color: #9ca3af;
-  background: #f9fafb;
+  color: #6B675C;
+  border-color: #B6AF9C;
+  background: #F1EFE9;
 }
 
 .filter-tab--sent.filter-tab--active {
-  color: #1d4ed8;
-  border-color: #1d4ed8;
-  background: #eff6ff;
+  color: #35507D;
+  border-color: #35507D;
+  background: #EAEEF3;
 }
 
 .filter-tab--overdue.filter-tab--active {
-  color: #b91c1c;
-  border-color: #b91c1c;
-  background: #fef2f2;
+  color: #9A4632;
+  border-color: #9A4632;
+  background: #F5E9E4;
 }
 
 .filter-tab--paid.filter-tab--active {
-  color: #15803d;
-  border-color: #15803d;
-  background: #f0fdf4;
+  color: #2C3930;
+  border-color: #3F4D42;
+  background: #E9EDE9;
 }
 
 .filter-tab__count {
@@ -1019,10 +1059,19 @@ body {
   white-space: nowrap;
 }
 
-.status-badge--draft  { background: #f0f0ef; color: #6b6b66; }
-.status-badge--sent   { background: #eff6ff; color: #1d4ed8; }
-.status-badge--paid   { background: #f0fdf4; color: #15803d; }
-.status-badge--overdue { background: #fef2f2; color: #b91c1c; }
+.status-badge--draft  { background: #F1EFE9; color: #6B675C; }
+.status-badge--sent   { background: #EAEEF3; color: #35507D; }
+.status-badge--paid   { background: #E9EDE9; color: #2C3930; }
+.status-badge--overdue { background: #F5E9E4; color: #9A4632; }
+
+/* Job status pipeline — grouped by meaning, not one hue per status */
+.status-badge--inquiry   { background: #F1EFE9; color: #6B675C; } /* not started, same as draft */
+.status-badge--booked    { background: #EAEEF3; color: #35507D; } /* in motion, same as sent */
+.status-badge--confirmed { background: #EAEEF3; color: #35507D; }
+.status-badge--shot      { background: #E9EDE9; color: #2C3930; } /* work done, same as paid */
+.status-badge--delivered { background: #E9EDE9; color: #2C3930; }
+.status-badge--invoiced  { background: #EAEEF3; color: #35507D; }
+.status-badge--cancelled { background: #F5E9E4; color: #9A4632; } /* problem state, same as overdue */
 
 /* Row actions */
 
@@ -1088,23 +1137,23 @@ body {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .reminder--overdue {
-    background: rgba(185, 28, 28, 0.12);
-    border-color: rgba(252, 165, 165, 0.3);
+    background: rgba(154, 70, 50, 0.16);
+    border-color: rgba(201, 134, 113, 0.35);
   }
   :root:not([data-theme="light"]) .reminder--soon {
-    background: rgba(180, 130, 0, 0.12);
-    border-color: rgba(253, 211, 77, 0.3);
+    background: rgba(201, 174, 124, 0.14);
+    border-color: rgba(201, 174, 124, 0.35);
   }
 }
 
 :root[data-theme="dark"] .reminder--overdue {
-  background: rgba(185, 28, 28, 0.12);
-  border-color: rgba(252, 165, 165, 0.3);
+  background: rgba(154, 70, 50, 0.16);
+  border-color: rgba(201, 134, 113, 0.35);
 }
 
 :root[data-theme="dark"] .reminder--soon {
-  background: rgba(180, 130, 0, 0.12);
-  border-color: rgba(253, 211, 77, 0.3);
+  background: rgba(201, 174, 124, 0.14);
+  border-color: rgba(201, 174, 124, 0.35);
 }
 
 /* ==========================================================================
@@ -1139,11 +1188,11 @@ body {
   cursor: pointer;
   text-decoration: none;
   color: #fff;
-  background: #3d5228;
+  background: var(--ui-text);
   transition: background 120ms ease, transform 80ms ease;
 }
 
-.btn--new:hover { background: #2e3e1e; }
+.btn--new:hover { background: #2E2E2C; }
 .btn--new:active { transform: scale(0.98); }
 
 /* Stage preview toggle */
@@ -1190,9 +1239,9 @@ body {
 .settings-saved-badge {
   font-size: 13px;
   font-weight: 600;
-  color: #15803d;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  color: #2C3930;
+  background: #E9EDE9;
+  border: 1px solid #C7D0C9;
   border-radius: var(--ui-radius);
   padding: 0 10px;
   height: 32px;

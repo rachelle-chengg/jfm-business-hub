@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listInvoices, effectiveStatus } from "../lib/db.js";
+import { listJobs, JOB_STATUS_LABEL } from "../lib/jobs.js";
 import { buildReminders } from "../lib/reminders.js";
 import { formatCurrency } from "../lib/money.js";
-import { formatShortDate } from "../lib/dates.js";
+import { formatShortDate, todayISO, addDays } from "../lib/dates.js";
 import { loadSettings } from "../lib/settings.js";
 
 const STATUS_LABEL = { draft: "Draft", sent: "Sent", paid: "Paid", overdue: "Overdue" };
-const AVATAR_COLORS = ["#647849", "#1d4ed8", "#b45309", "#7c3aed", "#0891b2", "#be185d"];
+const AVATAR_COLORS = ["#2C3930", "#35507D", "#9A4632", "#6B675C", "#5B4636", "#4A5D52"];
 
 function avatarColor(name) {
-  if (!name) return "#9d9d95";
+  if (!name) return "#948C7E";
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
@@ -18,15 +19,31 @@ function avatarColor(name) {
 
 export default function HubPage() {
   const [invoices, setInvoices] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [listFilter, setListFilter] = useState("all");
   const [balanceVisible, setBalanceVisible] = useState(true);
   const businessName = loadSettings().business.shortName || loadSettings().business.name || "there";
 
-  useEffect(() => { setInvoices(listInvoices()); }, []);
+  useEffect(() => {
+    setInvoices(listInvoices());
+    setJobs(listJobs());
+  }, []);
 
   const withStatus = invoices.map((inv) => ({ ...inv, _status: effectiveStatus(inv) }));
   const reminders = buildReminders(invoices);
+
+  const today = todayISO();
+  const tomorrow = addDays(today, 1);
+  const todaysJobs = jobs.filter((j) => j.date === today).sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
+  const tomorrowsJobs = jobs.filter((j) => j.date === tomorrow).sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
+  const scheduleJobs = [...todaysJobs, ...tomorrowsJobs];
+
+  const unconfirmedJobs = jobs
+    .filter((j) => j.status === "booked")
+    .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+
+  const attentionCount = reminders.length + unconfirmedJobs.length;
 
   const outstanding = withStatus
     .filter((i) => i._status === "sent" || i._status === "overdue")
@@ -59,17 +76,63 @@ export default function HubPage() {
           <h1 className="dash-greeting__name">Hi, {businessName} 👋</h1>
           <p className="dash-greeting__sub">Welcome back</p>
         </div>
-        {reminders.length > 0 && (
-          <div className="dash-greeting__bell" title={`${reminders.length} reminder${reminders.length !== 1 ? "s" : ""}`}>
+        {attentionCount > 0 && (
+          <div className="dash-greeting__bell" title={`${attentionCount} item${attentionCount !== 1 ? "s" : ""} need attention`}>
             <BellIcon />
-            <span className="dash-greeting__bell-badge">{reminders.length}</span>
+            <span className="dash-greeting__bell-badge">{attentionCount}</span>
           </div>
         )}
       </div>
 
-      {/* Reminder banners */}
-      {reminders.length > 0 && (
+      {/* Today's Schedule */}
+      {scheduleJobs.length > 0 && (
+        <section style={{ marginBottom: 20 }}>
+          <div className="dash-section-head">
+            <h2 className="dash-section-title">Today's Schedule</h2>
+            <Link to="/jobs" className="dash-see-all">See all</Link>
+          </div>
+          <div className="inv-list">
+            {todaysJobs.map((job) => (
+              <div className="job-row" key={job.id}>
+                <span className="job-row__time">{job.time || "—"}</span>
+                <div className="job-row__body">
+                  <div className="job-row__address">{job.address}</div>
+                  <div className="job-row__sub">{job.clientName || "—"}{job.package ? ` · ${job.package}` : ""}</div>
+                </div>
+                <span className={`status-badge status-badge--${job.status}`}>{JOB_STATUS_LABEL[job.status]}</span>
+              </div>
+            ))}
+            {tomorrowsJobs.map((job) => (
+              <div className="job-row" key={job.id}>
+                <span className="job-row__time">Tmrw {job.time || ""}</span>
+                <div className="job-row__body">
+                  <div className="job-row__address">{job.address}</div>
+                  <div className="job-row__sub">{job.clientName || "—"}{job.package ? ` · ${job.package}` : ""}</div>
+                </div>
+                <span className={`status-badge status-badge--${job.status}`}>{JOB_STATUS_LABEL[job.status]}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Needs Attention */}
+      {attentionCount > 0 && (
         <section className="reminders">
+          {unconfirmedJobs.map((job) => (
+            <div key={job.id} className="reminder reminder--info">
+              <div className="reminder__body">
+                <div className="reminder__icon">📅</div>
+                <div>
+                  <p className="reminder__title">
+                    {job.address} needs confirmation{job.date ? ` — ${formatShortDate(job.date)}` : ""}
+                  </p>
+                  <p className="reminder__sub">{job.clientName || "—"} &bull; Booked</p>
+                </div>
+              </div>
+              <Link to="/jobs" className="btn btn--ghost reminder__copy">Review</Link>
+            </div>
+          ))}
           {reminders.map((r) => {
             const id = r.invoice.id + r.type;
             const isOverdue = r.type === "overdue";
@@ -127,13 +190,13 @@ export default function HubPage() {
 
       {/* Quick actions */}
       <div className="quick-actions">
-        <Link to="/invoices/new" className="quick-action">
+        <Link to="/jobs" className="quick-action">
           <span className="quick-action__icon"><PlusIcon /></span>
-          <span>New Invoice</span>
+          <span>Add Job</span>
         </Link>
-        <Link to="/invoices" className="quick-action">
+        <Link to="/invoices/new" className="quick-action">
           <span className="quick-action__icon"><ListIcon /></span>
-          <span>All Invoices</span>
+          <span>New Invoice</span>
         </Link>
         <Link to="/clients" className="quick-action">
           <span className="quick-action__icon"><PersonIcon /></span>

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout.jsx";
 import HubPage from "./pages/HubPage.jsx";
+import JobsPage from "./pages/JobsPage.jsx";
 import InvoicesPage from "./pages/InvoicesPage.jsx";
 import ClientsPage from "./pages/ClientsPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         {/* Hub shell — nav + dashboard + list pages */}
         <Route element={<AppLayout />}>
           <Route index element={<HubPage />} />
+          <Route path="jobs" element={<JobsPage />} />
           <Route path="invoices" element={<InvoicesPage />} />
           <Route path="clients" element={<ClientsPage />} />
           <Route path="settings" element={<SettingsPage />} />
