@@ -206,18 +206,75 @@ body {
 
 .input--mono { font-family: var(--ui-mono); font-size: 13.5px; }
 
-/* Native <select> dropdown arrow — replaced so it isn't jammed against the
-   edge and stays visually consistent with the rest of the outline icon set. */
-select.input {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 36px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6B6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px 16px;
+/* Custom <select> replacement (components/Select.jsx) — a native <select>'s
+   open dropdown is rendered by the OS/browser and can't be restyled, which
+   reads as generic "computer" chrome next to the rest of this design
+   system. This renders its own popover instead. */
+/* No explicit display/width here on purpose — a plain block div naturally
+   fills a block parent's width, and stretches or shrink-wraps correctly as
+   a flex item depending on context, exactly like the native <select> it
+   replaces did. Forcing width:100% here fought that in compact contexts
+   (e.g. the inline per-row status changer, sized via its own style prop). */
+.select { position: relative; }
+
+.select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
 }
+
+.select__trigger svg { width: 16px; height: 16px; color: var(--ui-muted); flex-shrink: 0; }
+
+.select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  min-width: 100%;
+  width: max-content;
+  max-width: 320px;
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+
+.select__option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--ui-text);
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.select__option:hover { background: var(--ui-hover); }
+.select__option--active { font-weight: 700; background: var(--ui-stage); }
+.select__option:disabled { color: var(--ui-muted); cursor: default; }
 
 .toggle {
   display: flex;

@@ -4,6 +4,7 @@ import { listClients, saveClient, deleteClient, listInvoices } from "../lib/db.j
 import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
 import TagInput from "../components/TagInput.jsx";
 import Modal from "../components/Modal.jsx";
+import Select from "../components/Select.jsx";
 import { SearchIcon, SortIcon, FilterIcon, StarIcon } from "../components/icons.jsx";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
@@ -297,40 +298,36 @@ export default function ClientsPage() {
         </div>
         <div className="select-field">
           <FilterIcon />
-          <select
-            className="input"
+          <Select
             value={favoriteFilter}
-            onChange={(e) => setFavoriteFilter(e.target.value)}
-            aria-label="Filter by favorite"
-          >
-            <option value="all">All clients</option>
-            <option value="favorites">Favorites only</option>
-          </select>
+            onChange={setFavoriteFilter}
+            options={[
+              { value: "all", label: "All clients" },
+              { value: "favorites", label: "Favorites only" },
+            ]}
+            ariaLabel="Filter by favorite"
+          />
         </div>
         <div className="select-field">
           <FilterIcon />
-          <select
-            className="input"
+          <Select
             value={balanceFilter}
-            onChange={(e) => setBalanceFilter(e.target.value)}
-            aria-label="Filter by outstanding balance"
-          >
-            <option value="all">Any balance</option>
-            <option value="outstanding">Outstanding balance</option>
-          </select>
+            onChange={setBalanceFilter}
+            options={[
+              { value: "all", label: "Any balance" },
+              { value: "outstanding", label: "Outstanding balance" },
+            ]}
+            ariaLabel="Filter by outstanding balance"
+          />
         </div>
         <div className="select-field">
           <SortIcon />
-          <select
-            className="input"
+          <Select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort clients"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+            onChange={setSortBy}
+            options={SORT_OPTIONS}
+            ariaLabel="Sort clients"
+          />
         </div>
       </div>
 

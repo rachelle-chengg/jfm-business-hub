@@ -1,4 +1,5 @@
 import Field from "./Field.jsx";
+import Select from "../Select.jsx";
 
 /**
  * Optional discount and interest/late-fee adjustments.
@@ -31,15 +32,15 @@ export default function AdjustmentSettings({ adjustment, onChange }) {
       {discount.enabled && (
         <div className="field-row field-row--align">
           <Field label="Discount type" id="discount-type">
-            <select
-              className="input"
-              id="discount-type"
+            <Select
               value={discount.type}
-              onChange={(e) => setDiscount({ type: e.target.value })}
-            >
-              <option value="percent">Percentage (%)</option>
-              <option value="flat">Flat amount ($)</option>
-            </select>
+              onChange={(type) => setDiscount({ type })}
+              options={[
+                { value: "percent", label: "Percentage (%)" },
+                { value: "flat", label: "Flat amount ($)" },
+              ]}
+              ariaLabel="Discount type"
+            />
           </Field>
           <Field
             label={discount.type === "percent" ? "Discount (%)" : "Discount ($)"}

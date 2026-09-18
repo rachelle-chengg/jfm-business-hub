@@ -6,6 +6,7 @@ import { createInvoice } from "../lib/invoice.js";
 import { formatShortDate, todayISO } from "../lib/dates.js";
 import { formatCurrency } from "../lib/money.js";
 import TagInput from "../components/TagInput.jsx";
+import Select from "../components/Select.jsx";
 
 export default function JobDetailPage() {
   const { id } = useParams();
@@ -146,16 +147,13 @@ export default function JobDetailPage() {
           )}
           <div className="field">
             <span className="field__label">Status</span>
-            <select
-              className="input"
+            <Select
               style={{ maxWidth: 220 }}
               value={job.status}
-              onChange={(e) => updateJob({ status: e.target.value })}
-            >
-              {JOB_STATUSES.map((s) => (
-                <option key={s} value={s}>{JOB_STATUS_LABEL[s]}</option>
-              ))}
-            </select>
+              onChange={(status) => updateJob({ status })}
+              options={JOB_STATUSES.map((s) => ({ value: s, label: JOB_STATUS_LABEL[s] }))}
+              ariaLabel="Status"
+            />
           </div>
         </div>
       </div>

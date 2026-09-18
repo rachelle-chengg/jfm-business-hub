@@ -5,6 +5,7 @@ import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 import { StatusBadge } from "./HubPage.jsx";
 import { SearchIcon, SortIcon } from "../components/icons.jsx";
+import Select from "../components/Select.jsx";
 
 const STATUSES = ["all", "draft", "sent", "overdue", "paid"];
 const STATUS_LABEL = { all: "All", draft: "Draft", sent: "Sent", overdue: "Overdue", paid: "Paid" };
@@ -100,16 +101,12 @@ export default function InvoicesPage() {
         </div>
         <div className="select-field">
           <SortIcon />
-          <select
-            className="input"
+          <Select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort invoices"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+            onChange={setSortBy}
+            options={SORT_OPTIONS}
+            ariaLabel="Sort invoices"
+          />
         </div>
       </div>
 

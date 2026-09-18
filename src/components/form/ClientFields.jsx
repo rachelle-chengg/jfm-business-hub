@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Field from "./Field.jsx";
 import { listClients } from "../../lib/db.js";
 import AddressAutocomplete from "../AddressAutocomplete.jsx";
+import Select from "../Select.jsx";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -20,9 +21,7 @@ export default function ClientFields({ client, onChange }) {
 
   const emailInvalid = emailTouched && client.email && !EMAIL_RE.test(client.email);
 
-  function handlePickClient(e) {
-    const id = e.target.value;
-    e.target.value = ""; // reset the picker itself; it's an action, not a bound field
+  function handlePickClient(id) {
     if (!id) return;
     const c = savedClients.find((sc) => sc.id === id);
     if (!c) return;
@@ -47,18 +46,17 @@ export default function ClientFields({ client, onChange }) {
             : "No saved clients yet — add one from the Clients page, or just fill in the fields below."
         }
       >
-        <select
-          className="input"
-          id="client-picker"
-          defaultValue=""
+        <Select
+          value=""
           onChange={handlePickClient}
           disabled={savedClients.length === 0}
-        >
-          <option value="">Start from scratch…</option>
-          {savedClients.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+          placeholder="Start from scratch…"
+          options={[
+            { value: "", label: "Start from scratch…" },
+            ...savedClients.map((c) => ({ value: c.id, label: c.name })),
+          ]}
+          ariaLabel="Autofill from an existing client"
+        />
       </Field>
       <Field label="Company or client name" id="client-name">
         <input className="input" type="text" autoComplete="organization" {...bind("name")} />

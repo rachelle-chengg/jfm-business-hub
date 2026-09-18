@@ -1,4 +1,5 @@
 import Field from "./Field.jsx";
+import Select from "../Select.jsx";
 import { DUE_DATE_OFFSET_DAYS } from "../../config/business.js";
 import { listTemplates } from "../../lib/templates.js";
 
@@ -14,16 +15,12 @@ export default function InvoiceDetails({ invoice, isNew, onSelectTemplate, onUpd
           id="invoice-template"
           hint="Sets the business info and payment instructions this invoice will use — locked in once you save it."
         >
-          <select
-            className="input"
-            id="invoice-template"
+          <Select
             value={invoice.templateId || templates[0].id}
-            onChange={(e) => onSelectTemplate(e.target.value)}
-          >
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
+            onChange={onSelectTemplate}
+            options={templates.map((t) => ({ value: t.id, label: t.name }))}
+            ariaLabel="Template"
+          />
         </Field>
       )}
       {!isNew && templates.length > 1 && (

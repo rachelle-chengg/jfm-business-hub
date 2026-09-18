@@ -8,6 +8,7 @@ import Modal from "../components/Modal.jsx";
 import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
 import TagInput from "../components/TagInput.jsx";
 import { SearchIcon, FilterIcon, SortIcon, MenuIcon } from "../components/icons.jsx";
+import Select from "../components/Select.jsx";
 
 const FILTER_TABS = ["all", ...JOB_STATUSES];
 
@@ -118,19 +119,18 @@ export default function JobsPage() {
             <div className="field-row">
               <div className="field">
                 <label className="field__label">Client</label>
-                <select
-                  className="input"
+                <Select
                   value={form.clientId || ""}
-                  onChange={(e) => {
-                    const c = clients.find((cl) => cl.id === e.target.value);
-                    setForm((f) => ({ ...f, clientId: e.target.value, clientName: c?.name || f.clientName }));
+                  onChange={(clientId) => {
+                    const c = clients.find((cl) => cl.id === clientId);
+                    setForm((f) => ({ ...f, clientId, clientName: c?.name || f.clientName }));
                   }}
-                >
-                  <option value="">Select a client…</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                  options={[
+                    { value: "", label: "Select a client…" },
+                    ...clients.map((c) => ({ value: c.id, label: c.name })),
+                  ]}
+                  ariaLabel="Client"
+                />
               </div>
               <div className="field">
                 <label className="field__label">Property address</label>
@@ -162,24 +162,26 @@ export default function JobsPage() {
               </div>
               <div className="field">
                 <label className="field__label">Status</label>
-                <select className="input" value={form.status}
-                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}>
-                  {JOB_STATUSES.map((s) => (
-                    <option key={s} value={s}>{JOB_STATUS_LABEL[s]}</option>
-                  ))}
-                </select>
+                <Select
+                  value={form.status}
+                  onChange={(status) => setForm((f) => ({ ...f, status }))}
+                  options={JOB_STATUSES.map((s) => ({ value: s, label: JOB_STATUS_LABEL[s] }))}
+                  ariaLabel="Status"
+                />
               </div>
             </div>
             <div className="field">
               <label className="field__label">Assigned to</label>
               {team.length > 0 ? (
-                <select className="input" value={form.assignedTo}
-                  onChange={(e) => setForm((f) => ({ ...f, assignedTo: e.target.value }))}>
-                  <option value="">Unassigned</option>
-                  {team.map((name) => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
+                <Select
+                  value={form.assignedTo}
+                  onChange={(assignedTo) => setForm((f) => ({ ...f, assignedTo }))}
+                  options={[
+                    { value: "", label: "Unassigned" },
+                    ...team.map((name) => ({ value: name, label: name })),
+                  ]}
+                  ariaLabel="Assigned to"
+                />
               ) : (
                 <>
                   <input className="input" value={form.assignedTo}
@@ -227,29 +229,25 @@ export default function JobsPage() {
         </div>
         <div className="select-field">
           <FilterIcon />
-          <select
-            className="input"
+          <Select
             value={droneFilter}
-            onChange={(e) => setDroneFilter(e.target.value)}
-            aria-label="Filter by drone requirement"
-          >
-            <option value="all">All jobs</option>
-            <option value="yes">Drone required</option>
-            <option value="no">No drone</option>
-          </select>
+            onChange={setDroneFilter}
+            options={[
+              { value: "all", label: "All jobs" },
+              { value: "yes", label: "Drone required" },
+              { value: "no", label: "No drone" },
+            ]}
+            ariaLabel="Filter by drone requirement"
+          />
         </div>
         <div className="select-field">
           <SortIcon />
-          <select
-            className="input"
+          <Select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort jobs"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+            onChange={setSortBy}
+            options={SORT_OPTIONS}
+            ariaLabel="Sort jobs"
+          />
         </div>
       </div>
 
@@ -349,17 +347,14 @@ export default function JobsPage() {
                     <div className="row-actions">
                       <button type="button" className="btn btn--ghost btn--sm" onClick={() => startEdit(job)}>Edit</button>
                       {job.status !== "cancelled" && (
-                        <select
-                          className="input btn--sm"
+                        <Select
+                          className="btn--sm"
                           style={{ width: "auto", height: 28, fontSize: "12.5px" }}
                           value={job.status}
-                          onChange={(e) => handleStatusChange(job, e.target.value)}
-                          aria-label="Change status"
-                        >
-                          {JOB_STATUSES.map((s) => (
-                            <option key={s} value={s}>{JOB_STATUS_LABEL[s]}</option>
-                          ))}
-                        </select>
+                          onChange={(status) => handleStatusChange(job, status)}
+                          options={JOB_STATUSES.map((s) => ({ value: s, label: JOB_STATUS_LABEL[s] }))}
+                          ariaLabel="Change status"
+                        />
                       )}
                       <button type="button" className="btn btn--danger btn--sm" onClick={() => handleDelete(job)}>Delete</button>
                     </div>
