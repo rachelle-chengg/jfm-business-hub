@@ -25,6 +25,7 @@ export default function InvoiceGenerator({
     return loadDraft() ?? createInvoice({ invoiceNumber: DEFAULT_INVOICE_NUMBER });
   });
   const [mobileView, setMobileView] = useState("editor");
+  const [mobilePreview, setMobilePreview] = useState(false);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
   const [driveState, setDriveState] = useState("idle"); // idle | uploading | done | error
 
@@ -121,7 +122,14 @@ export default function InvoiceGenerator({
             </h1>
             <p className="editor__subtitle">Changes save automatically in this browser.</p>
           </div>
-          {/* New invoice only shown in edit mode — Preview panel has its own toggle */}
+          <button
+            type="button"
+            className="btn btn--ghost btn--sm"
+            onClick={() => setMobilePreview((v) => !v)}
+            aria-pressed={mobilePreview}
+          >
+            <EyeIcon /> {mobilePreview ? "Desktop preview" : "Mobile preview"}
+          </button>
         </header>
 
         <InvoiceForm
@@ -182,7 +190,7 @@ export default function InvoiceGenerator({
         </footer>
       </aside>
 
-      <main className="stage">
+      <main className={`stage${mobilePreview ? " stage--mobile-frame" : ""}`}>
         {/* Mobile-only toggle lives on the preview panel */}
         <button
           type="button"
@@ -199,7 +207,13 @@ export default function InvoiceGenerator({
             </>
           )}
         </button>
-        <InvoicePreview invoice={invoice} totals={totals} />
+        {mobilePreview ? (
+          <div className="stage__mobile-frame">
+            <InvoicePreview invoice={invoice} totals={totals} />
+          </div>
+        ) : (
+          <InvoicePreview invoice={invoice} totals={totals} />
+        )}
       </main>
     </div>
   );

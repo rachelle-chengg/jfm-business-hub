@@ -79,7 +79,27 @@ Two tokens, two tiers — chosen after explicit feedback that an earlier "tight,
 
 Base control sizing was bumped alongside this (`.input`/`.btn` height 36px → 44px, padding increased) — pill shapes need more generous padding and height to read as intentional rather than a thin sliver with rounded ends.
 
-Search and select inputs that need a leading icon (search bar, filter/sort dropdowns) use the `.search-field` / `.select-field` wrapper pattern — an absolutely-positioned icon plus `padding-left: 42px` on the `.input` inside. See `SearchIcon`/`FilterIcon`/`SortIcon` in `src/components/icons.jsx`.
+Search and select inputs that need a leading icon (search bar, filter/sort dropdowns) use the `.search-field` / `.select-field` wrapper pattern — an absolutely-positioned icon plus `padding-left: 44px` on the `.input` inside. See `SearchIcon`/`FilterIcon`/`SortIcon` in `src/components/icons.jsx`.
+
+## Spacing
+
+Every `padding`/`margin`/`gap` value in `app.css` sits on a 4px grid (4, 8, 12, 16, 20, 24, 28, 32...). This wasn't the case for most of this file's history — values like 6, 10, 14, 18, 22px crept in incrementally across earlier passes and were audited and rounded up to the nearest 4px in one pass after explicit feedback that things read as "too close together." Icon dimensions (`width`/`height` on an icon's `<svg>`) follow the same grid for the same reason — inconsistent icon sizing (14 vs 15 vs 16px scattered around) contributes to the same slightly-off feeling as inconsistent spacing, so icons are now consistently 16px (small) or 20px (medium, e.g. dashboard quick-action icons).
+
+**Exceptions, deliberate:** border/stroke widths (1px, 1.5px, 2px) and focus-ring `outline-offset` (1-2px) are not on this grid — they serve definition/accessibility purposes, not layout rhythm, and forcing them to 4px would make borders/rings look chunky rather than crisp.
+
+When adding new CSS, pick from the grid rather than eyeballing a value — if 14px looks right, use 16px; if 10px looks right, use 12px. Round up, not down, per the same reasoning as the audit.
+
+## Dashboard quick actions
+
+Icon-circle + label, like a banking app's quick actions (this replaced two earlier attempts: a 4-tile icon-grid, then plain pill buttons — see the design log for why each didn't work). `.dash-action--primary`/`--secondary` preserve the primary/secondary distinction the actions had as buttons: a solid black circle (`--ui-accent` background) for the primary action, an outlined white circle for the secondary one. Deliberately not colored per-action like typical banking-app references (red/green/blue/yellow) — that would reintroduce the multi-color palette the neutral black/white/gray decision removed.
+
+## Form sectioning (invoice editor)
+
+The invoice form's fields (Client, Invoice, Line items, Tax, Adjustments — one `<section className="form__section">` per group already in the JSX) used to sit on one continuous white background separated only by hairline dividers, which read as an undifferentiated wall of fields. `.form` now has its own gray (`--ui-stage`) background, and each `.form__section` is its own white bordered card (`--ui-radius-lg`) — the same "cards on a gray canvas" pattern used elsewhere in the app, applied here for the same reason: visual grouping without touching any of the form's actual field logic.
+
+## Mobile preview (invoice editor)
+
+The eye-icon "Mobile preview" button in the invoice editor's header (top-right) wraps `InvoicePreview` in a fixed 390×700px framed container (`.stage__mobile-frame`) when active. This works with zero changes to `InvoicePreview.jsx` itself — that component already measures its container via `ResizeObserver` and scales the invoice sheet to fit, so constraining the container to phone width is enough to simulate a mobile view. If the preview's scaling logic ever needs touching, check `SHEET_WIDTH_PX`/`fit()` in `InvoicePreview.jsx` — the mobile-frame CSS doesn't duplicate that logic, it just changes what the observer sees.
 
 ## Responsive
 
