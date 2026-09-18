@@ -3,13 +3,36 @@ import { Link } from "react-router-dom";
 import { listJobs, saveJob, deleteJob, updateJobStatus, JOB_STATUSES, JOB_STATUS_LABEL } from "../lib/jobs.js";
 import { listClients } from "../lib/db.js";
 import { formatShortDate } from "../lib/dates.js";
+import Modal from "../components/Modal.jsx";
 
 const FILTER_TABS = ["all", ...JOB_STATUSES];
+
+const SORT_OPTIONS = [
+  { value: "date-asc", label: "Date: soonest first" },
+  { value: "date-desc", label: "Date: latest first" },
+  { value: "client", label: "Client name" },
+  { value: "address", label: "Address" },
+  { value: "status", label: "Status" },
+];
+
+function sortJobs(jobs, sortBy) {
+  const copy = [...jobs];
+  switch (sortBy) {
+    case "date-desc": return copy.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+    case "client": return copy.sort((a, b) => (a.clientName ?? "").localeCompare(b.clientName ?? ""));
+    case "address": return copy.sort((a, b) => (a.address ?? "").localeCompare(b.address ?? ""));
+    case "status": return copy.sort((a, b) => (a.status ?? "").localeCompare(b.status ?? ""));
+    default: return copy.sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+  }
+}
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
   const [clients, setClients] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("date-asc");
+  const [droneFilter, setDroneFilter] = useState("all");
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm());
 
@@ -34,14 +57,13 @@ export default function JobsPage() {
 
   function handleSave(e) {
     e.preventDefault();
-    if (!form.clientName.trim() || !form.address.trim()) return;
     saveJob({ ...form, id: editingId === "new" ? undefined : editingId });
     setEditingId(null);
     load();
   }
 
   function handleDelete(job) {
-    if (!window.confirm(`Delete this job at ${job.address}? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete this job at ${job.address || "this address"}? This cannot be undone.`)) return;
     deleteJob(job.id);
     load();
   }
@@ -51,9 +73,20 @@ export default function JobsPage() {
     load();
   }
 
-  const filtered = jobs
-    .filter((j) => filter === "all" || j.status === filter)
-    .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+  const filtered = sortJobs(
+    jobs.filter((j) => {
+      const matchStatus = filter === "all" || j.status === filter;
+      const matchDrone = droneFilter === "all" || (droneFilter === "yes" ? !!j.droneRequired : !j.droneRequired);
+      const q = search.toLowerCase();
+      const matchSearch =
+        !q ||
+        (j.address || "").toLowerCase().includes(q) ||
+        (j.clientName || "").toLowerCase().includes(q) ||
+        (j.package || "").toLowerCase().includes(q);
+      return matchStatus && matchDrone && matchSearch;
+    }),
+    sortBy
+  );
 
   return (
     <div className="hub-page">
@@ -65,14 +98,11 @@ export default function JobsPage() {
       </div>
 
       {editingId !== null && (
-        <div className="client-form-card">
-          <h3 className="client-form-card__title">
-            {editingId === "new" ? "New job" : "Edit job"}
-          </h3>
+        <Modal title={editingId === "new" ? "New job" : "Edit job"} onClose={cancelEdit}>
           <form onSubmit={handleSave}>
             <div className="field-row">
               <div className="field">
-                <label className="field__label">Client *</label>
+                <label className="field__label">Client</label>
                 <select
                   className="input"
                   value={form.clientId || ""}
@@ -88,9 +118,9 @@ export default function JobsPage() {
                 </select>
               </div>
               <div className="field">
-                <label className="field__label">Property address *</label>
+                <label className="field__label">Property address</label>
                 <input className="input" value={form.address}
-                  onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} required />
+                  onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
               </div>
             </div>
             <div className="field-row">
@@ -139,8 +169,39 @@ export default function JobsPage() {
               <button type="button" className="btn btn--ghost" onClick={cancelEdit}>Cancel</button>
             </div>
           </form>
-        </div>
+        </Modal>
       )}
+
+      {/* Toolbar: search, sort, drone filter */}
+      <div className="toolbar">
+        <input
+          className="input toolbar__search"
+          type="search"
+          placeholder="Search by address, client, package…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          className="input toolbar__sort"
+          value={droneFilter}
+          onChange={(e) => setDroneFilter(e.target.value)}
+          aria-label="Filter by drone requirement"
+        >
+          <option value="all">All jobs</option>
+          <option value="yes">Drone required</option>
+          <option value="no">No drone</option>
+        </select>
+        <select
+          className="input toolbar__sort"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          aria-label="Sort jobs"
+        >
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="filter-tabs">
         {FILTER_TABS.map((s) => (
@@ -160,8 +221,12 @@ export default function JobsPage() {
 
       {filtered.length === 0 ? (
         <div className="empty-state">
-          <p>{filter !== "all" ? `No ${JOB_STATUS_LABEL[filter].toLowerCase()} jobs.` : "No jobs yet — this is where you'll track shoots from booking through delivery."}</p>
-          {filter === "all" && (
+          <p>
+            {search || filter !== "all" || droneFilter !== "all"
+              ? "No jobs match your filters."
+              : "No jobs yet — this is where you'll track shoots from booking through delivery."}
+          </p>
+          {!search && filter === "all" && droneFilter === "all" && (
             <button type="button" className="btn btn--primary" onClick={startNew}>Add your first job</button>
           )}
         </div>
@@ -187,7 +252,7 @@ export default function JobsPage() {
                     {job.time && <div className="inv-table__sub">{job.time}</div>}
                   </td>
                   <td>{job.clientName || "—"}</td>
-                  <td><Link to={`/jobs/${job.id}`} className="link">{job.address}</Link></td>
+                  <td><Link to={`/jobs/${job.id}`} className="link">{job.address || "Untitled job"}</Link></td>
                   <td>{job.package || "—"}</td>
                   <td>{job.droneRequired ? "Yes" : "—"}</td>
                   <td>
