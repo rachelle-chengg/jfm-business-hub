@@ -40,7 +40,7 @@ export default function AppLayout() {
           ))}
         </nav>
         <p className="hub-sidebar__credit">
-          Designed by littlebytedesigns.com
+          Designed by Little Byte Designs
           <br />
           © 2026 All rights reserved.
         </p>
