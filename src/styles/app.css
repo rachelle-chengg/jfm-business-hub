@@ -116,8 +116,11 @@ body {
   flex-direction: column;
 }
 
+/* Horizontal padding matches .editor__header/.editor__footer (28px) so the
+   section cards line up with the title/buttons above and below them —
+   they'd previously sat 4px narrower, a subtle but visible misalignment. */
 .form {
-  padding: 20px 24px 24px;
+  padding: 20px 28px 24px;
   background: var(--ui-stage);
   display: flex;
   flex-direction: column;
