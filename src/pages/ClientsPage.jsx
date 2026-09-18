@@ -67,7 +67,8 @@ export default function ClientsPage() {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [emailTouched, setEmailTouched] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [columnOrder, setColumnOrder] = useState(loadColumnOrder);
   const [dragKey, setDragKey] = useState(null);
   const emailInvalid = emailTouched && form.email && !EMAIL_RE.test(form.email);
@@ -132,50 +133,44 @@ export default function ClientsPage() {
     load();
   }
 
-  function handleDelete(client) {
-    if (!window.confirm(`Delete ${client.name}? This only removes the client record — invoices are kept.`)) return;
-    deleteClient(client.id);
-    load();
-  }
-
   function toggleFavorite(client) {
     saveClient({ ...client, favorite: !client.favorite });
     load();
   }
 
-  function updateClient(id, patch) {
-    setClients((prev) => {
-      const next = prev.map((c) => (c.id === id ? { ...c, ...patch } : c));
-      saveClient(next.find((c) => c.id === id));
-      return next;
-    });
+  function toggleSelectMode() {
+    setSelectMode((v) => !v);
+    setSelectedIds([]);
+  }
+
+  function toggleSelected(id) {
+    setSelectedIds((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
+  }
+
+  function toggleSelectAll() {
+    setSelectedIds((ids) => (ids.length === filtered.length ? [] : filtered.map((c) => c.id)));
+  }
+
+  function handleBulkDelete() {
+    const count = selectedIds.length;
+    if (!count) return;
+    if (!window.confirm(`Delete ${count} client${count === 1 ? "" : "s"}? This only removes the client records — invoices are kept.`)) return;
+    selectedIds.forEach((id) => deleteClient(id));
+    setSelectedIds([]);
+    setSelectMode(false);
+    load();
   }
 
   function renderCell(key, c, stats) {
     switch (key) {
       case "name":
-        return editMode ? (
-          <input className="input" value={c.name}
-            onChange={(e) => updateClient(c.id, { name: e.target.value })} />
-        ) : (
-          <Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link>
-        );
+        return <Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link>;
       case "email":
-        return editMode ? (
-          <input className="input" type="email" value={c.email || ""}
-            onChange={(e) => updateClient(c.id, { email: e.target.value })} />
-        ) : c.email ? (
-          <a className="link" href={`mailto:${c.email}`}>{c.email}</a>
-        ) : "—";
+        return c.email ? <a className="link" href={`mailto:${c.email}`}>{c.email}</a> : "—";
       case "phone":
-        return editMode ? (
-          <input className="input" value={c.phone || ""}
-            onChange={(e) => updateClient(c.id, { phone: e.target.value })} />
-        ) : (c.phone || "—");
+        return c.phone || "—";
       case "tags":
-        return editMode ? (
-          <TagInput tags={c.tags || []} onChange={(tags) => updateClient(c.id, { tags })} />
-        ) : c.tags?.length > 0 ? (
+        return c.tags?.length > 0 ? (
           <div className="tag-pills">{c.tags.map((t) => <span className="tag-pill" key={t}>{t}</span>)}</div>
         ) : "—";
       case "invoices":
@@ -213,9 +208,9 @@ export default function ClientsPage() {
           <button
             type="button"
             className="btn btn--ghost btn--sm"
-            onClick={() => setEditMode((v) => !v)}
+            onClick={toggleSelectMode}
           >
-            {editMode ? "Done editing" : "Edit"}
+            {selectMode ? "Cancel" : "Select"}
           </button>
           <button type="button" className="btn btn--primary" onClick={startNew}>
             + Add Client
@@ -339,6 +334,27 @@ export default function ClientsPage() {
         </div>
       </div>
 
+      {selectMode && (
+        <div className="bulk-bar">
+          <span className="bulk-bar__count">
+            {selectedIds.length === 0 ? "Select clients to delete" : `${selectedIds.length} selected`}
+          </span>
+          <div className="bulk-bar__actions">
+            <button type="button" className="btn btn--ghost btn--sm" onClick={toggleSelectAll}>
+              {selectedIds.length === filtered.length ? "Deselect all" : "Select all"}
+            </button>
+            <button
+              type="button"
+              className="btn btn--danger btn--sm"
+              onClick={handleBulkDelete}
+              disabled={selectedIds.length === 0}
+            >
+              Delete{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
+            </button>
+          </div>
+        </div>
+      )}
+
       {filtered.length === 0 ? (
         <div className="empty-state">
           <p>
@@ -354,10 +370,20 @@ export default function ClientsPage() {
         </div>
       ) : (
         <div className="inv-table-wrap">
-          <table className={`inv-table client-table${editMode ? " client-table--editing" : ""}`}>
+          <table className="inv-table client-table">
             <thead>
               <tr>
-                <th></th>
+                <th>
+                  {selectMode && (
+                    <input
+                      type="checkbox"
+                      className="checkbox"
+                      checked={selectedIds.length === filtered.length}
+                      onChange={toggleSelectAll}
+                      aria-label="Select all clients"
+                    />
+                  )}
+                </th>
                 {columnOrder.map((key) => (
                   <th
                     key={key}
@@ -372,30 +398,39 @@ export default function ClientsPage() {
                     {ALL_COLUMNS[key].label}
                   </th>
                 ))}
-                {editMode && <th>Remove</th>}
               </tr>
             </thead>
             <tbody>
               {filtered.map((c) => {
                 const stats = allStats[c.id] || { count: 0, total: 0, lastDate: null };
                 return (
-                  <tr key={c.id}>
+                  <tr key={c.id} className={selectedIds.includes(c.id) ? "client-table__row--selected" : undefined}>
                     <td>
-                      <button
-                        type="button"
-                        className="icon-btn"
-                        onClick={() => toggleFavorite(c)}
-                        title={c.favorite ? "Unfavorite" : "Favorite"}
-                        aria-label={c.favorite ? `Unfavorite ${c.name}` : `Favorite ${c.name}`}
-                        style={{ color: c.favorite ? "#C9AE7C" : undefined }}
-                      >
-                        <StarIcon filled={!!c.favorite} />
-                      </button>
+                      {selectMode ? (
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          checked={selectedIds.includes(c.id)}
+                          onChange={() => toggleSelected(c.id)}
+                          aria-label={`Select ${c.name}`}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          className="icon-btn"
+                          onClick={() => toggleFavorite(c)}
+                          title={c.favorite ? "Unfavorite" : "Favorite"}
+                          aria-label={c.favorite ? `Unfavorite ${c.name}` : `Favorite ${c.name}`}
+                          style={{ color: c.favorite ? "#C9AE7C" : undefined }}
+                        >
+                          <StarIcon filled={!!c.favorite} />
+                        </button>
+                      )}
                     </td>
                     {columnOrder.map((key) => (
                       <td
                         key={key}
-                        style={editMode ? undefined : {
+                        style={{
                           maxWidth: ALL_COLUMNS[key].width,
                           whiteSpace: "nowrap",
                           overflow: "hidden",
@@ -405,19 +440,6 @@ export default function ClientsPage() {
                         {renderCell(key, c, stats)}
                       </td>
                     ))}
-                    {editMode && (
-                      <td>
-                        <button
-                          type="button"
-                          className="icon-btn icon-btn--delete"
-                          onClick={() => handleDelete(c)}
-                          title="Delete client"
-                          aria-label={`Delete ${c.name}`}
-                        >
-                          <TrashIcon />
-                        </button>
-                      </td>
-                    )}
                   </tr>
                 );
               })}
@@ -436,13 +458,3 @@ function emptyForm() {
   };
 }
 
-function TrashIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6M14 11v6" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-    </svg>
-  );
-}

@@ -1085,6 +1085,66 @@ select.input {
   flex-wrap: wrap;
 }
 
+/* Bulk-select action bar (e.g. Clients "Select" mode) */
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  margin-bottom: 12px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line-strong);
+  border-radius: var(--ui-radius-lg);
+}
+
+.bulk-bar__count { font-size: 13px; font-weight: 500; color: var(--ui-muted); }
+.bulk-bar__actions { display: flex; align-items: center; gap: 8px; }
+
+/* Standalone checkbox — same custom control as .toggle input, but usable
+   outside a label (table cells, bulk-select rows) instead of native OS
+   checkbox chrome that clashes with the rest of the design system. */
+.checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1.5px solid var(--ui-line-strong);
+  border-radius: 6px;
+  background: var(--ui-bg);
+  cursor: pointer;
+  position: relative;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.checkbox:hover { border-color: var(--ui-text); }
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+.checkbox:checked {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+
+.checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--ui-accent-contrast);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.client-table__row--selected td { background: var(--ui-hover); }
+
 /* Search always takes its own full row; filter/sort sit on the row below it. */
 .toolbar__search,
 .search-field { flex: 1 1 100%; min-width: 0; position: relative; }

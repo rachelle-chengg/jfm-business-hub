@@ -6,7 +6,10 @@ import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 import { StatusBadge } from "./HubPage.jsx";
 import TagInput from "../components/TagInput.jsx";
+import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
 import { StarIcon } from "../components/icons.jsx";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ClientDetailPage() {
   const { id } = useParams();
@@ -14,6 +17,10 @@ export default function ClientDetailPage() {
   const [client, setClient] = useState(undefined);
   const [jobs, setJobs] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [form, setForm] = useState(null);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const emailInvalid = emailTouched && form?.email && !EMAIL_RE.test(form.email);
 
   useEffect(() => {
     const c = listClients().find((cl) => cl.id === id);
@@ -57,6 +64,26 @@ export default function ClientDetailPage() {
     setClient((c) => ({ ...c, favorite }));
   }
 
+  function startEdit() {
+    setForm({ ...client });
+    setEmailTouched(false);
+    setEditMode(true);
+  }
+
+  function cancelEdit() {
+    setEditMode(false);
+    setForm(null);
+  }
+
+  function handleSave(e) {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    saveClient(form);
+    setClient(form);
+    setEditMode(false);
+    setForm(null);
+  }
+
   return (
     <div className="hub-page">
       <Link to="/clients" className="editor__back">← Back to clients</Link>
@@ -73,6 +100,9 @@ export default function ClientDetailPage() {
           >
             <StarIcon filled={!!client.favorite} />
           </button>
+          {!editMode && (
+            <button type="button" className="btn btn--ghost btn--sm" onClick={startEdit}>Edit</button>
+          )}
           <button type="button" className="btn btn--danger btn--sm" onClick={handleDelete}>Delete</button>
         </div>
       </div>
@@ -82,44 +112,98 @@ export default function ClientDetailPage() {
         <div className="hub-section__head">
           <h2 className="hub-section__title">Contact Information</h2>
         </div>
-        <div style={{ padding: "16px 20px" }}>
-          <div className="field-row">
+        {editMode ? (
+          <form onSubmit={handleSave} style={{ padding: "16px 20px" }}>
             <div className="field">
-              <span className="field__label">Email</span>
-              <div className="settings-readonly">
-                {client.email ? <a className="link" href={`mailto:${client.email}`}>{client.email}</a> : "—"}
+              <label className="field__label">Name *</label>
+              <input className="input" value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                required autoFocus />
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label className="field__label">Email</label>
+                <input className={`input${emailInvalid ? " input--error" : ""}`} type="email" value={form.email || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  onBlur={() => setEmailTouched(true)} />
+                {emailInvalid && <p className="field__hint field__hint--error">Please enter a valid email address.</p>}
+              </div>
+              <div className="field">
+                <label className="field__label">Phone</label>
+                <input className="input" value={form.phone || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
               </div>
             </div>
             <div className="field">
-              <span className="field__label">Phone</span>
-              <div className="settings-readonly">{client.phone || "—"}</div>
+              <label className="field__label">Address</label>
+              <AddressAutocomplete
+                className="input"
+                value={form.address1 || ""}
+                onChange={(v) => setForm((f) => ({ ...f, address1: v }))}
+              />
             </div>
-          </div>
-          <div className="field">
-            <span className="field__label">Address</span>
-            <div className="settings-readonly">{client.address1 || "—"}</div>
-          </div>
-          <div className="field-row">
+            <div className="field-row">
+              <div className="field">
+                <label className="field__label">Website</label>
+                <input className="input" type="url" placeholder="https://…" value={form.website || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} />
+              </div>
+              <div className="field">
+                <label className="field__label">Social channels</label>
+                <input className="input" placeholder="@handle or links, comma separated" value={form.social || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, social: e.target.value }))} />
+              </div>
+            </div>
             <div className="field">
-              <span className="field__label">Website</span>
-              <div className="settings-readonly">{client.website || "—"}</div>
+              <label className="field__label">Notes</label>
+              <textarea className="input settings-textarea" rows={3} value={form.notes || ""}
+                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+            </div>
+            <div className="form-actions">
+              <button type="submit" className="btn btn--primary">Save changes</button>
+              <button type="button" className="btn btn--ghost" onClick={cancelEdit}>Cancel</button>
+            </div>
+          </form>
+        ) : (
+          <div style={{ padding: "16px 20px" }}>
+            <div className="field-row">
+              <div className="field">
+                <span className="field__label">Email</span>
+                <div className="settings-readonly">
+                  {client.email ? <a className="link" href={`mailto:${client.email}`}>{client.email}</a> : "—"}
+                </div>
+              </div>
+              <div className="field">
+                <span className="field__label">Phone</span>
+                <div className="settings-readonly">{client.phone || "—"}</div>
+              </div>
             </div>
             <div className="field">
-              <span className="field__label">Social channels</span>
-              <div className="settings-readonly">{client.social || "—"}</div>
+              <span className="field__label">Address</span>
+              <div className="settings-readonly">{client.address1 || "—"}</div>
             </div>
-          </div>
-          {client.notes && (
+            <div className="field-row">
+              <div className="field">
+                <span className="field__label">Website</span>
+                <div className="settings-readonly">{client.website || "—"}</div>
+              </div>
+              <div className="field">
+                <span className="field__label">Social channels</span>
+                <div className="settings-readonly">{client.social || "—"}</div>
+              </div>
+            </div>
+            {client.notes && (
+              <div className="field">
+                <span className="field__label">Notes</span>
+                <div className="settings-readonly settings-readonly--pre">{client.notes}</div>
+              </div>
+            )}
             <div className="field">
-              <span className="field__label">Notes</span>
-              <div className="settings-readonly settings-readonly--pre">{client.notes}</div>
+              <span className="field__label">Tags</span>
+              <TagInput tags={client.tags || []} onChange={updateTags} />
             </div>
-          )}
-          <div className="field">
-            <span className="field__label">Tags</span>
-            <TagInput tags={client.tags || []} onChange={updateTags} />
           </div>
-        </div>
+        )}
       </div>
 
       {/* Summary */}
