@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { HomeIcon, CameraIcon, PersonIcon, DocumentIcon, GearIcon } from "../icons.jsx";
+import { HomeIcon, ListIcon, PersonIcon, DocumentIcon, GearIcon } from "../icons.jsx";
 
 const NAV_LINKS = [
   { to: "/", end: true, label: "Dashboard", Icon: HomeIcon },
-  { to: "/jobs", label: "Jobs", Icon: CameraIcon },
+  { to: "/jobs", label: "Jobs", Icon: ListIcon },
   { to: "/clients", label: "Clients", Icon: PersonIcon },
   { to: "/invoices", label: "Invoices", Icon: DocumentIcon },
   { to: "/settings", label: "Settings", Icon: GearIcon },
@@ -39,6 +39,11 @@ export default function AppLayout() {
             </NavLink>
           ))}
         </nav>
+        <p className="hub-sidebar__credit">
+          Designed by littlebytedesigns.com
+          <br />
+          © 2026 All rights reserved.
+        </p>
       </aside>
 
       {/* Mobile: top bar + hamburger dropdown */}

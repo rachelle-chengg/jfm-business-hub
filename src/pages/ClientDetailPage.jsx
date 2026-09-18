@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { listClients, listInvoices, deleteClient, effectiveStatus } from "../lib/db.js";
+import { listClients, saveClient, listInvoices, deleteClient, effectiveStatus } from "../lib/db.js";
 import { listJobs, JOB_STATUS_LABEL } from "../lib/jobs.js";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 import { StatusBadge } from "./HubPage.jsx";
+import TagInput from "../components/TagInput.jsx";
 
 export default function ClientDetailPage() {
   const { id } = useParams();
@@ -44,6 +45,11 @@ export default function ClientDetailPage() {
     navigate("/clients");
   }
 
+  function updateTags(tags) {
+    saveClient({ ...client, tags });
+    setClient((c) => ({ ...c, tags }));
+  }
+
   return (
     <div className="hub-page">
       <Link to="/clients" className="editor__back">← Back to clients</Link>
@@ -73,6 +79,10 @@ export default function ClientDetailPage() {
           <div className="field">
             <span className="field__label">Address</span>
             <div className="settings-readonly">{client.address1 || "—"}</div>
+          </div>
+          <div className="field">
+            <span className="field__label">Tags</span>
+            <TagInput tags={client.tags || []} onChange={updateTags} />
           </div>
         </div>
       </div>

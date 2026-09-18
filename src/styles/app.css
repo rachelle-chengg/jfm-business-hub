@@ -68,6 +68,14 @@ body {
   border-bottom: 1px solid var(--ui-line);
 }
 
+/* Only useful below 900px, where the editor and preview stack instead of
+   showing side by side — on desktop both are already visible at once. */
+.editor__preview-toggle { display: none; }
+
+@media (max-width: 900px) {
+  .editor__preview-toggle { display: inline-flex; }
+}
+
 .editor__title {
   margin: 0;
   font-size: 18px;
@@ -190,9 +198,9 @@ select.input {
 }
 
 .toggle {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   height: 36px;
   margin-bottom: 16px;
   font-size: 13px;
@@ -201,7 +209,43 @@ select.input {
   user-select: none;
 }
 
-.toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--ui-accent); }
+/* Custom checkbox — the native one was an unstyled square, inconsistent
+   with the rest of the UI's rounded, deliberate control language. */
+.toggle input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1.5px solid var(--ui-line-strong);
+  border-radius: 6px;
+  background: var(--ui-bg);
+  cursor: pointer;
+  position: relative;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.toggle input:hover { border-color: var(--ui-text); }
+
+.toggle input:checked {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+
+.toggle input:checked::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--ui-accent-contrast);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.toggle input:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
 
 /* Line items */
 
@@ -215,7 +259,7 @@ select.input {
 .items__head,
 .items__row {
   display: grid;
-  grid-template-columns: 1fr 118px 28px;
+  grid-template-columns: 1fr 180px 32px;
   gap: 8px;
   align-items: center;
 }
@@ -431,6 +475,14 @@ select.input {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.hub-sidebar__credit {
+  margin: auto 0 0;
+  padding: 0 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ui-muted);
 }
 
 .hub-sidebar__link {
@@ -1001,6 +1053,12 @@ select.input {
   flex-wrap: wrap;
 }
 
+/* Search always takes its own full row; filter/sort sit on the row below it. */
+.toolbar__search,
+.search-field { flex: 1 1 100%; min-width: 0; }
+.toolbar__sort,
+.select-field { flex: 0 0 auto; width: auto; }
+
 .toolbar__search { flex: 1; min-width: 180px; }
 .toolbar__sort { width: auto; min-width: 160px; flex-shrink: 0; cursor: pointer; }
 
@@ -1028,13 +1086,72 @@ select.input {
    Filter tabs
    ========================================================================== */
 
+/* One scrollable row, not a wrapping grid — like Uber Eats' category tabs.
+   Wrapping to a second row read as messy once there were 9 status tabs. */
 .filter-tabs {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
   border-bottom: 1px solid var(--ui-line);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
 }
+
+.filter-tabs::-webkit-scrollbar { display: none; }
+
+.filter-tabs-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.filter-tabs-row .filter-tabs { flex: 1; min-width: 0; margin-bottom: 0; }
+
+/* Jump-to-tab menu — for when there are too many tabs to scan by scrolling */
+.filter-tabs-menu {
+  position: relative;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+.filter-tabs-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  padding: 6px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+
+.filter-tabs-menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--ui-text);
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.filter-tabs-menu__item:hover { background: var(--ui-stage); }
+.filter-tabs-menu__item--active { font-weight: 700; }
+.filter-tabs-menu__item span:last-child { color: var(--ui-muted); font-size: 11.5px; }
 
 .filter-tabs--compact { gap: 16px; margin-bottom: 16px; }
 
@@ -1245,6 +1362,126 @@ select.input {
   .modal-dialog { max-width: none; max-height: 90vh; border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 0 0; }
 }
 
+/* ==========================================================================
+   Address autocomplete
+   ========================================================================== */
+
+.address-autocomplete { position: relative; }
+
+.address-autocomplete__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.address-autocomplete__list li { margin: 0; }
+
+.address-autocomplete__list button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ui-text);
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.address-autocomplete__list button:hover { background: var(--ui-stage); }
+
+/* ==========================================================================
+   Tag input — custom tags on Jobs and Clients
+   ========================================================================== */
+
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 16px;
+}
+
+.tag-input:focus-within {
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 3px var(--ui-focus);
+}
+
+.tag-input__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 6px 0 12px;
+  background: var(--ui-stage);
+  border-radius: var(--ui-radius);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ui-text);
+}
+
+.tag-input__pill button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  color: var(--ui-muted);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.tag-input__pill button:hover { background: var(--ui-line-strong); color: var(--ui-text); }
+.tag-input__pill button svg { width: 11px; height: 11px; }
+
+.tag-input input {
+  flex: 1;
+  min-width: 100px;
+  border: 0;
+  outline: none;
+  font: inherit;
+  font-size: 13.5px;
+  background: none;
+  color: var(--ui-text);
+}
+
+/* Read-only tag pills shown on list/detail pages (not an input) */
+.tag-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  background: var(--ui-stage);
+  border-radius: var(--ui-radius);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ui-muted);
+  white-space: nowrap;
+}
+
 /* Empty state */
 
 .empty-state {
@@ -1412,17 +1649,6 @@ select.input {
   .inv-table-wrap { border-radius: 14px; }
   .inv-table th,
   .inv-table td { padding: 12px 12px; }
-
-  /* Toolbar: search takes its own full-width row, filter/sort pills stay
-     compact and wrap instead of stretching edge to edge */
-  .toolbar__search,
-  .search-field { flex: 1 1 100%; min-width: 0; }
-  .toolbar__sort,
-  .select-field { flex: 0 0 auto; width: auto; }
-
-  /* Filter tabs scroll horizontally */
-  .filter-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
-  .filter-tabs::-webkit-scrollbar { display: none; }
 
   /* Field rows collapse to single column */
   .field-row { grid-template-columns: 1fr; gap: 0; }

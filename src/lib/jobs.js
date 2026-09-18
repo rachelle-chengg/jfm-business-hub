@@ -3,7 +3,7 @@
  *
  * Job schema:
  *   { id, clientId, clientName, address, date, time, package, shootType,
- *     droneRequired, notes, status, createdAt, updatedAt }
+ *     droneRequired, assignedTo, tags, notes, status, createdAt, updatedAt }
  *
  * Status pipeline (business-hub-photographer.md):
  *   Inquiry -> Booked -> Confirmed -> Shot -> Delivered -> Invoiced -> Paid

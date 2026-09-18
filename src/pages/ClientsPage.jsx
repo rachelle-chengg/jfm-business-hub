@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listClients, saveClient, deleteClient, listInvoices } from "../lib/db.js";
+import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
+import TagInput from "../components/TagInput.jsx";
 import { SearchIcon, SortIcon } from "../components/icons.jsx";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
@@ -140,9 +142,16 @@ export default function ClientsPage() {
               </div>
               <div className="field">
                 <label className="field__label">Address</label>
-                <input className="input" value={form.address1}
-                  onChange={(e) => setForm((f) => ({ ...f, address1: e.target.value }))} />
+                <AddressAutocomplete
+                  className="input"
+                  value={form.address1}
+                  onChange={(v) => setForm((f) => ({ ...f, address1: v }))}
+                />
               </div>
+            </div>
+            <div className="field">
+              <label className="field__label">Tags</label>
+              <TagInput tags={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
             </div>
             <div className="form-actions">
               <button type="submit" className="btn btn--primary">
@@ -209,7 +218,14 @@ export default function ClientsPage() {
                 const stats = allStats[c.id] || { count: 0, total: 0, lastDate: null };
                 return (
                   <tr key={c.id}>
-                    <td><Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link></td>
+                    <td>
+                      <Link to={`/clients/${c.id}`} className="link"><strong>{c.name}</strong></Link>
+                      {c.tags?.length > 0 && (
+                        <div className="tag-pills" style={{ marginTop: 6 }}>
+                          {c.tags.map((t) => <span className="tag-pill" key={t}>{t}</span>)}
+                        </div>
+                      )}
+                    </td>
                     <td>{c.email || "—"}</td>
                     <td>{c.phone || "—"}</td>
                     <td>{stats.count}</td>
@@ -249,7 +265,7 @@ export default function ClientsPage() {
 }
 
 function emptyForm() {
-  return { name: "", email: "", phone: "", address1: "", address2: "" };
+  return { name: "", email: "", phone: "", address1: "", address2: "", tags: [] };
 }
 
 function PencilIcon() {

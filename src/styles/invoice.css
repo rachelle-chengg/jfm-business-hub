@@ -115,6 +115,11 @@
   margin-top: 0.29in;
 }
 
+.sheet__business-link {
+  color: inherit;
+  text-decoration: none;
+}
+
 .sheet__logo {
   /* The PNG carries transparent padding; sized so the artwork itself is 1.68in wide. */
   width: 2.18in;

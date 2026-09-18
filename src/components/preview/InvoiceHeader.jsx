@@ -9,9 +9,13 @@ export default function InvoiceHeader() {
         <address className="sheet__business">
           {BUSINESS.name}
           <br />
-          {BUSINESS.phone}
+          <a href={`tel:${BUSINESS.phone.replace(/\D/g, "")}`} className="sheet__business-link">
+            {BUSINESS.phone}
+          </a>
           <br />
-          {BUSINESS.email}
+          <a href={`mailto:${BUSINESS.email}`} className="sheet__business-link">
+            {BUSINESS.email}
+          </a>
           <br />
           {BUSINESS.taxId}
         </address>

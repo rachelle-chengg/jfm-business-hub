@@ -123,7 +123,7 @@ export default function InvoiceGenerator({
           </div>
           <button
             type="button"
-            className="btn btn--ghost btn--sm"
+            className="btn btn--ghost btn--sm editor__preview-toggle"
             onClick={() => setMobileView((v) => (v === "editor" ? "preview" : "editor"))}
             aria-pressed={mobileView === "preview"}
           >

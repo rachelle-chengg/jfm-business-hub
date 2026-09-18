@@ -61,7 +61,7 @@ export default function AdjustmentSettings({ adjustment, onChange }) {
       )}
 
       {/* Interest / late fee */}
-      <label className="toggle" style={{ marginTop: discount.enabled ? 0 : 4 }}>
+      <label className="toggle">
         <input
           type="checkbox"
           checked={interest.enabled}

@@ -52,7 +52,18 @@ Sans-serif throughout, no serif — Space Grotesk was chosen over a serif specif
 
 **Rule: icons are always outline style — `fill="none"`, `stroke="currentColor"`, with `strokeLinecap="round"` and `strokeLinejoin="round"`.** No filled glyphs, no sharp/mitered joins. Every icon in the hub follows this — keep any new icon consistent with it.
 
-Shared, reused-across-pages icons (currently `SearchIcon`, `FilterIcon`, `SortIcon`) live in `src/components/icons.jsx`. One-off icons used on a single page stay defined locally in that page file, matching the existing convention (e.g. `PencilIcon`/`TrashIcon` duplicated in `ClientsPage.jsx`/`SettingsPage.jsx`) — only promote an icon to the shared file once it's actually used in more than one place.
+Shared, reused-across-pages icons (`SearchIcon`, `FilterIcon`, `SortIcon`, `MenuIcon`, `ListIcon`, `HomeIcon`, `PersonIcon`, `DocumentIcon`, `GearIcon`) live in `src/components/icons.jsx`. One-off icons used on a single page stay defined locally in that page file, matching the existing convention (e.g. `PencilIcon`/`TrashIcon` duplicated in `ClientsPage.jsx`/`SettingsPage.jsx`) — only promote an icon to the shared file once it's actually used in more than one place. Nav icons are chosen for what they mean in this specific business, not generic defaults: Jobs uses a plain list icon, Clients a person, Invoices a document.
+
+## Shared components
+
+Beyond `Modal.jsx`, two more general-purpose components exist and should be reused rather than reimplemented:
+
+- **`TagInput.jsx`** — free-form tags (type + Enter/comma to add, click × or Backspace to remove). Used on Jobs and Clients. A read-only variant for list/table display doesn't need a component — just render `.tag-pills > .tag-pill` directly (see `JobsPage.jsx`/`ClientsPage.jsx` table cells).
+- **`AddressAutocomplete.jsx`** — a drop-in replacement for a plain address `<input>`, debounced (400ms, 3-char minimum) against OpenStreetMap's free Nominatim search API. No API key or billing required, chosen explicitly over Google Places Autocomplete for that reason. Used on the invoice form's Client fields, the Clients page form, and the Jobs form. If quality ever becomes an issue (Nominatim is decent but not as complete as Google's data, especially outside major cities), swapping to Google Places would mean replacing this component's fetch call, not its call sites.
+
+## Jump-to-tab menu
+
+When a `.filter-tabs` row has enough tabs that horizontal scrolling alone makes some hard to find (Jobs has 9 status tabs), pair it with a `.filter-tabs-menu` — a small icon button (`MenuIcon`) that opens a popover listing every tab with its count, letting the user jump directly instead of scrolling. See `JobsPage.jsx` for the reference implementation; adopt the same pattern if another page's tab row grows past what fits on one screen width.
 
 ## Signature element: corner registration marks
 

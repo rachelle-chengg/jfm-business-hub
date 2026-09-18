@@ -5,6 +5,7 @@ import { listClients, listInvoices } from "../lib/db.js";
 import { createInvoice } from "../lib/invoice.js";
 import { formatShortDate, todayISO } from "../lib/dates.js";
 import { formatCurrency } from "../lib/money.js";
+import TagInput from "../components/TagInput.jsx";
 
 export default function JobDetailPage() {
   const { id } = useParams();
@@ -125,6 +126,16 @@ export default function JobDetailPage() {
             <div className="field">
               <span className="field__label">Drone required</span>
               <div className="settings-readonly">{job.droneRequired ? "Yes" : "No"}</div>
+            </div>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <span className="field__label">Assigned to</span>
+              <div className="settings-readonly">{job.assignedTo || "—"}</div>
+            </div>
+            <div className="field">
+              <span className="field__label">Tags</span>
+              <TagInput tags={job.tags || []} onChange={(tags) => updateJob({ tags })} />
             </div>
           </div>
           {job.notes && (

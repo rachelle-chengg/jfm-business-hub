@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { listJobs, saveJob, deleteJob, updateJobStatus, JOB_STATUSES, JOB_STATUS_LABEL } from "../lib/jobs.js";
 import { listClients } from "../lib/db.js";
 import { formatShortDate } from "../lib/dates.js";
 import Modal from "../components/Modal.jsx";
-import { SearchIcon, FilterIcon, SortIcon } from "../components/icons.jsx";
+import AddressAutocomplete from "../components/AddressAutocomplete.jsx";
+import TagInput from "../components/TagInput.jsx";
+import { SearchIcon, FilterIcon, SortIcon, MenuIcon } from "../components/icons.jsx";
 
 const FILTER_TABS = ["all", ...JOB_STATUSES];
 
@@ -36,11 +38,21 @@ export default function JobsPage() {
   const [droneFilter, setDroneFilter] = useState("all");
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm());
+  const [tabMenuOpen, setTabMenuOpen] = useState(false);
+  const tabMenuRef = useRef(null);
 
   function load() {
     setJobs(listJobs());
     setClients(listClients());
   }
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (tabMenuRef.current && !tabMenuRef.current.contains(e.target)) setTabMenuOpen(false);
+    }
+    if (tabMenuOpen) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [tabMenuOpen]);
 
   useEffect(() => { load(); }, []);
 
@@ -120,8 +132,11 @@ export default function JobsPage() {
               </div>
               <div className="field">
                 <label className="field__label">Property address</label>
-                <input className="input" value={form.address}
-                  onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
+                <AddressAutocomplete
+                  className="input"
+                  value={form.address}
+                  onChange={(v) => setForm((f) => ({ ...f, address: v }))}
+                />
               </div>
             </div>
             <div className="field-row">
@@ -153,11 +168,21 @@ export default function JobsPage() {
                 </select>
               </div>
             </div>
+            <div className="field">
+              <label className="field__label">Assigned to</label>
+              <input className="input" value={form.assignedTo}
+                onChange={(e) => setForm((f) => ({ ...f, assignedTo: e.target.value }))}
+                placeholder="e.g. Jonathan, or a second shooter's name" />
+            </div>
             <label className="toggle">
               <input type="checkbox" checked={!!form.droneRequired}
                 onChange={(e) => setForm((f) => ({ ...f, droneRequired: e.target.checked }))} />
               <span>Drone required</span>
             </label>
+            <div className="field">
+              <label className="field__label">Tags</label>
+              <TagInput tags={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
+            </div>
             <div className="field">
               <label className="field__label">Notes</label>
               <input className="input" value={form.notes}
@@ -213,20 +238,48 @@ export default function JobsPage() {
         </div>
       </div>
 
-      <div className="filter-tabs">
-        {FILTER_TABS.map((s) => (
+      <div className="filter-tabs-row">
+        <div className="filter-tabs-menu" ref={tabMenuRef}>
           <button
-            key={s}
             type="button"
-            className={`filter-tab${filter === s ? " filter-tab--active filter-tab--all" : ""}`}
-            onClick={() => setFilter(s)}
+            className="icon-btn"
+            onClick={() => setTabMenuOpen((v) => !v)}
+            aria-label="Jump to a status"
+            aria-expanded={tabMenuOpen}
           >
-            {s === "all" ? "All" : JOB_STATUS_LABEL[s]}
-            <span className="filter-tab__count">
-              {s === "all" ? jobs.length : jobs.filter((j) => j.status === s).length}
-            </span>
+            <MenuIcon />
           </button>
-        ))}
+          {tabMenuOpen && (
+            <div className="filter-tabs-menu__dropdown">
+              {FILTER_TABS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`filter-tabs-menu__item${filter === s ? " filter-tabs-menu__item--active" : ""}`}
+                  onClick={() => { setFilter(s); setTabMenuOpen(false); }}
+                >
+                  <span>{s === "all" ? "All" : JOB_STATUS_LABEL[s]}</span>
+                  <span>{s === "all" ? jobs.length : jobs.filter((j) => j.status === s).length}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="filter-tabs">
+          {FILTER_TABS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className={`filter-tab${filter === s ? " filter-tab--active filter-tab--all" : ""}`}
+              onClick={() => setFilter(s)}
+            >
+              {s === "all" ? "All" : JOB_STATUS_LABEL[s]}
+              <span className="filter-tab__count">
+                {s === "all" ? jobs.length : jobs.filter((j) => j.status === s).length}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -262,7 +315,14 @@ export default function JobsPage() {
                     {job.time && <div className="inv-table__sub">{job.time}</div>}
                   </td>
                   <td>{job.clientName || "—"}</td>
-                  <td><Link to={`/jobs/${job.id}`} className="link">{job.address || "Untitled job"}</Link></td>
+                  <td>
+                    <Link to={`/jobs/${job.id}`} className="link">{job.address || "Untitled job"}</Link>
+                    {job.tags?.length > 0 && (
+                      <div className="tag-pills" style={{ marginTop: 6 }}>
+                        {job.tags.map((t) => <span className="tag-pill" key={t}>{t}</span>)}
+                      </div>
+                    )}
+                  </td>
                   <td>{job.package || "—"}</td>
                   <td>{job.droneRequired ? "Yes" : "—"}</td>
                   <td>
@@ -308,6 +368,8 @@ function emptyForm() {
     time: "",
     package: "",
     droneRequired: false,
+    assignedTo: "",
+    tags: [],
     notes: "",
     status: "inquiry",
   };
