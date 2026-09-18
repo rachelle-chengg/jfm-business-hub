@@ -26,9 +26,9 @@ export default function DownloadPDFButton({ invoice, exportPdf = exportInvoiceTo
       <button type="button" className="btn btn--primary btn--block" onClick={handleClick} disabled={state === "working"}>
         {state === "working" ? "Preparing PDF\u2026" : "Export"}
       </button>
-      <p className="download__hint">
-        {state === "error" ? "The PDF could not be created. Try again." : filename}
-      </p>
+      {state === "error" && (
+        <p className="download__hint">The PDF could not be created. Try again.</p>
+      )}
     </div>
   );
 }
