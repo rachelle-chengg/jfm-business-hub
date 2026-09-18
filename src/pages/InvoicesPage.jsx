@@ -4,6 +4,7 @@ import { listInvoices, deleteInvoice, updateInvoiceStatus, effectiveStatus } fro
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 import { StatusBadge } from "./HubPage.jsx";
+import { SearchIcon, SortIcon } from "../components/icons.jsx";
 
 const STATUSES = ["all", "draft", "sent", "overdue", "paid"];
 const STATUS_LABEL = { all: "All", draft: "Draft", sent: "Sent", overdue: "Overdue", paid: "Paid" };
@@ -87,23 +88,29 @@ export default function InvoicesPage() {
 
       {/* Toolbar */}
       <div className="toolbar">
-        <input
-          className="input toolbar__search"
-          type="search"
-          placeholder="Search by number, client…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="input toolbar__sort"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          aria-label="Sort invoices"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <div className="search-field">
+          <SearchIcon />
+          <input
+            className="input"
+            type="search"
+            placeholder="Search by number, client…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="select-field">
+          <SortIcon />
+          <select
+            className="input"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort invoices"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Filter tabs */}

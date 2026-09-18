@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listClients, saveClient, deleteClient, listInvoices } from "../lib/db.js";
+import { SearchIcon, SortIcon } from "../components/icons.jsx";
 import { formatCurrency } from "../lib/money.js";
 import { formatShortDate } from "../lib/dates.js";
 
@@ -147,23 +148,29 @@ export default function ClientsPage() {
 
       {/* Toolbar */}
       <div className="toolbar">
-        <input
-          className="input toolbar__search"
-          type="search"
-          placeholder="Search clients…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="input toolbar__sort"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          aria-label="Sort clients"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <div className="search-field">
+          <SearchIcon />
+          <input
+            className="input"
+            type="search"
+            placeholder="Search clients…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="select-field">
+          <SortIcon />
+          <select
+            className="input"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort clients"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {filtered.length === 0 ? (

@@ -8,29 +8,33 @@ All tokens live in `:root` at the top of `src/styles/app.css`. Change a value th
 
 ## Color
 
-Source: `colour-palette.jpg` (brand palette — Mossed Stone / Polished Concrete / Cast Limestone / Beton Noir), named after the physical materials of a built property, which is what this business photographs.
+Source palette: `colour-palette.jpg` (Mossed Stone / Polished Concrete / Cast Limestone / Beton Noir), named after the physical materials of a built property, which is what this business photographs.
+
+**Mossed Stone (green) is reserved for brand moments only** — currently just the dashboard hero card's gradient. Everyday UI (buttons, links, active nav/filter states, focus rings) runs on a neutral black/white/gray scale instead, per an explicit request to move toward a neutral palette after seeing reference designs built that way.
 
 | Brand name | Hex | Role | CSS token |
 | --- | --- | --- | --- |
-| Mossed Stone | `#2C3930` | Primary — accent, primary buttons, active states, "paid" status | `--ui-accent` |
-| Polished Concrete | `#E9E8E3` | Primary — page background (light mode), dark-mode text | `--ui-stage` |
-| Cast Limestone | `#DCD7C9` | Secondary — strong borders/dividers | `--ui-line-strong` |
-| Beton Noir | `#1A1A1A` | Secondary — primary text/ink, dark bold buttons | `--ui-text` |
+| Beton Noir | `#1A1A1A` | Primary text/ink, **and** the everyday-UI accent (buttons, active states, links) | `--ui-text`, `--ui-accent` |
+| Polished Concrete | `#E9E8E3` | Page background (light mode); becomes the dark-mode accent (see below) | `--ui-stage` |
+| Cast Limestone | `#DCD7C9` | Strong borders/dividers | `--ui-line-strong` |
+| Mossed Stone | `#2C3930` | Brand moment only — the hero card gradient, nowhere else | (hardcoded on `.hero-card`, not a reusable token) |
 
-Everything else is derived to stay in the same family — nothing is an arbitrary off-palette pick:
+Everything else, derived to stay neutral:
 
 | Token | Hex / value | Usage |
 | --- | --- | --- |
-| `--ui-bg` | `#FFFFFF` | Card/surface white, sits on top of the Polished Concrete page background |
-| `--ui-muted` | `#6B675C` | Secondary text — a blend between Beton Noir and Cast Limestone |
+| `--ui-bg` | `#FFFFFF` | Card/surface white |
+| `--ui-muted` | `#6B6B6B` | Secondary text — a clean neutral gray (an earlier warm-beige version, `#6B675C`, was explicitly rejected as looking "beige" rather than gray) |
 | `--ui-line` | `#EEEAE0` | Hairline dividers — a lighter tint of Cast Limestone |
-| `--ui-accent-hover` | `#3F4D42` | Lightened Mossed Stone, for hover on dark-on-light buttons |
-| `--ui-focus` | `rgba(44, 57, 48, 0.28)` | Focus ring — Mossed Stone tint |
+| `--ui-accent` | `#1A1A1A` | Primary buttons, active nav/sidebar links, links, checkbox tint, focus-ring base — black in light mode |
+| `--ui-accent-hover` | `#333330` | Hover state for accent-colored buttons |
+| `--ui-accent-contrast` | `#FFFFFF` | Text/icon color drawn *on top of* `--ui-accent` — exists as its own token specifically so dark mode can flip it (see below) |
+| `--ui-focus` | `rgba(26, 26, 26, 0.16)` | Focus ring — neutral, not colored |
 | `--ui-danger` | `#9A4632` | Overdue / destructive actions — a muted brick/rust, kept in the same desaturated material family instead of a stock alert red |
 
-Functional status colors (draft / sent / overdue / paid — used by `.status-badge--*` and `.filter-tab--*`) stay semantically conventional (grey / blue / red / green) but every hue is pulled toward the brand's muted, warm-neutral register rather than bright SaaS defaults. "Paid" specifically reuses Mossed Stone directly, since it's both the brand's primary color and the conventional "success" hue — not a coincidence, a deliberate overlap.
+Functional status colors (draft / sent / overdue / paid — used by `.status-badge--*` and `.filter-tab--*`) stay semantically conventional (grey / blue / red / green) — these are data-state colors, a separate design question from the brand-accent one above, and weren't part of the neutral-palette change. "Paid" still reuses Mossed Stone's hex directly, since green-for-success is the universal convention and the overlap with the brand color is intentional.
 
-**Dark mode** (`prefers-color-scheme: dark` or `[data-theme="dark"]`): background drops toward Beton Noir (`#201F1C` / `#1A1A1A`), text becomes Polished Concrete (`#E9E8E3`), and the focus ring lightens to a legible mossy green (`rgba(120,150,130,0.35)`) since dark-on-dark would disappear.
+**Dark mode** (`prefers-color-scheme: dark` or `[data-theme="dark"]`): background drops toward Beton Noir, text becomes Polished Concrete. Because the light-mode accent is now literally black (`--ui-text`'s color), it can't just stay black in dark mode — it would vanish against a dark background. `--ui-accent` flips to Polished Concrete (`#E9E8E3`, light) in dark mode, and `--ui-accent-contrast` flips to `#1A1A1A` (dark text on the now-light accent). Any component drawing accent-colored text on an accent background **must** use `var(--ui-accent-contrast)`, never a hardcoded `#fff` — that hardcoding was the bug that would have made primary-button text invisible in dark mode.
 
 ## Typography
 
@@ -46,7 +50,9 @@ Sans-serif throughout, no serif — Space Grotesk was chosen over a serif specif
 
 ## Icons
 
-**Rule: icons are always outline style — `fill="none"`, `stroke="currentColor"`, with `strokeLinecap="round"` and `strokeLinejoin="round"`.** No filled glyphs, no sharp/mitered joins. Every icon currently in the hub (`HubPage.jsx`, `ClientsPage.jsx`, `SettingsPage.jsx`) already follows this — keep any new icon consistent with it.
+**Rule: icons are always outline style — `fill="none"`, `stroke="currentColor"`, with `strokeLinecap="round"` and `strokeLinejoin="round"`.** No filled glyphs, no sharp/mitered joins. Every icon in the hub follows this — keep any new icon consistent with it.
+
+Shared, reused-across-pages icons (currently `SearchIcon`, `FilterIcon`, `SortIcon`) live in `src/components/icons.jsx`. One-off icons used on a single page stay defined locally in that page file, matching the existing convention (e.g. `PencilIcon`/`TrashIcon` duplicated in `ClientsPage.jsx`/`SettingsPage.jsx`) — only promote an icon to the shared file once it's actually used in more than one place.
 
 ## Signature element: corner registration marks
 
@@ -66,8 +72,14 @@ The one deliberate flourish in the system, used exactly once — on the dashboar
 
 ## Shape
 
-- Controls (buttons, inputs, tags): `--ui-radius: 6px`
-- Cards/containers (hero card, sections, tables): 10–14px, set per-component (not tokenized yet — see Open items)
+Two tokens, two tiers — chosen after explicit feedback that an earlier "tight, architectural" 6px pass read as too sharp, with reference designs pointing toward fully rounded/pill controls instead:
+
+- `--ui-radius: 999px` — controls: buttons, inputs (text + select), icon buttons, nav links, badges. This is a real pill/circle, not a subtle rounding — `.icon-btn` and the hamburger button become perfect circles, `.btn` and `.input` become true stadium-shaped pills.
+- `--ui-radius-lg: 18px` — larger surfaces: hero card, `.hub-section`, `.client-form-card`, `.settings-card`, `.inv-table-wrap`, `.modal-dialog`, `.empty-state`, `.reminder`, `.inv-list`. Generously rounded, but not literal pill/stadium shape — a big rectangle at 999px radius would look like a giant capsule, not "rounded."
+
+Base control sizing was bumped alongside this (`.input`/`.btn` height 36px → 44px, padding increased) — pill shapes need more generous padding and height to read as intentional rather than a thin sliver with rounded ends.
+
+Search and select inputs that need a leading icon (search bar, filter/sort dropdowns) use the `.search-field` / `.select-field` wrapper pattern — an absolutely-positioned icon plus `padding-left: 42px` on the `.input` inside. See `SearchIcon`/`FilterIcon`/`SortIcon` in `src/components/icons.jsx`.
 
 ## Responsive
 
@@ -81,7 +93,8 @@ Already built in prior to this redesign; untouched by the color/type rework. Fou
 
 Any new component should be checked at all three widths, not just desktop.
 
-## Open items / not yet tokenized
+## Open items
 
-- Card border-radius (10px / 14px / 18px appear ad hoc across `.hero-card`, `.hub-section`, `.settings-card`, etc.) — could consolidate into `--ui-radius-lg` in a future pass.
+- **Dashboard hero card is commented out** (`src/pages/HubPage.jsx`, in the JSX, not deleted) — its treatment is undecided. It was the one place Mossed Stone green still appeared; if it comes back changed, reconsider whether it should.
 - No dedicated success/warning tokens exist yet beyond the status-badge hex pairs — if more "positive/attention" moments get added outside invoice status, promote these to root tokens instead of repeating hex values.
+- The per-row status-change `<select>` in `JobsPage.jsx`'s table (inline-styled, `width:auto; height:28px`) is still a quick hack, not a proper component — flagged, not yet fixed.

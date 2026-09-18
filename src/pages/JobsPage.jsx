@@ -4,6 +4,7 @@ import { listJobs, saveJob, deleteJob, updateJobStatus, JOB_STATUSES, JOB_STATUS
 import { listClients } from "../lib/db.js";
 import { formatShortDate } from "../lib/dates.js";
 import Modal from "../components/Modal.jsx";
+import { SearchIcon, FilterIcon, SortIcon } from "../components/icons.jsx";
 
 const FILTER_TABS = ["all", ...JOB_STATUSES];
 
@@ -174,33 +175,42 @@ export default function JobsPage() {
 
       {/* Toolbar: search, sort, drone filter */}
       <div className="toolbar">
-        <input
-          className="input toolbar__search"
-          type="search"
-          placeholder="Search by address, client, package…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="input toolbar__sort"
-          value={droneFilter}
-          onChange={(e) => setDroneFilter(e.target.value)}
-          aria-label="Filter by drone requirement"
-        >
-          <option value="all">All jobs</option>
-          <option value="yes">Drone required</option>
-          <option value="no">No drone</option>
-        </select>
-        <select
-          className="input toolbar__sort"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          aria-label="Sort jobs"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <div className="search-field">
+          <SearchIcon />
+          <input
+            className="input"
+            type="search"
+            placeholder="Search by address, client, package…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="select-field">
+          <FilterIcon />
+          <select
+            className="input"
+            value={droneFilter}
+            onChange={(e) => setDroneFilter(e.target.value)}
+            aria-label="Filter by drone requirement"
+          >
+            <option value="all">All jobs</option>
+            <option value="yes">Drone required</option>
+            <option value="no">No drone</option>
+          </select>
+        </div>
+        <div className="select-field">
+          <SortIcon />
+          <select
+            className="input"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort jobs"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="filter-tabs">

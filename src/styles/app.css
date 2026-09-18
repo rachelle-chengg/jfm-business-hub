@@ -3,21 +3,29 @@
    ========================================================================== */
 
 :root {
-  /* Brand palette — Mossed Stone / Polished Concrete / Cast Limestone / Beton Noir */
+  /* Brand palette — Mossed Stone / Polished Concrete / Cast Limestone / Beton Noir.
+     Mossed Stone (green) is reserved for brand moments (the dashboard hero card) —
+     everyday UI (buttons, links, active states, focus rings) runs on a neutral
+     black/white/gray scale instead, via --ui-accent below. */
   --ui-bg: #FFFFFF;
   --ui-stage: #E9E8E3;
   --ui-text: #1A1A1A;
-  --ui-muted: #6B675C;
+  --ui-muted: #6B6B6B;
   --ui-line: #EEEAE0;
   --ui-line-strong: #DCD7C9;
-  --ui-accent: #2C3930;
-  --ui-accent-hover: #3F4D42;
-  --ui-focus: rgba(44, 57, 48, 0.28);
+  --ui-accent: #1A1A1A;
+  --ui-accent-hover: #333330;
+  --ui-accent-contrast: #FFFFFF;
+  --ui-focus: rgba(26, 26, 26, 0.16);
   --ui-danger: #9A4632;
   --ui-font: "Inter", system-ui, -apple-system, sans-serif;
   --ui-font-display: "Space Grotesk", "Inter", sans-serif;
   --ui-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --ui-radius: 6px;
+  /* Controls (buttons, inputs, nav items, badges) are fully pill-shaped;
+     larger surfaces (cards, tables, panels) get a generous but proportionate
+     rounded corner instead of literal pill/stadium shape. */
+  --ui-radius: 999px;
+  --ui-radius-lg: 18px;
   --editor-width: 420px;
 }
 
@@ -128,8 +136,8 @@ body {
 
 .input {
   width: 100%;
-  height: 36px;
-  padding: 0 10px;
+  height: 44px;
+  padding: 0 18px;
   font: inherit;
   font-size: 14px;
   color: var(--ui-text);
@@ -158,7 +166,7 @@ select.input {
   -webkit-appearance: none;
   -moz-appearance: none;
   padding-right: 36px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B675C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6B6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 14px 14px;
@@ -233,9 +241,9 @@ select.input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  height: 36px;
-  padding: 0 14px;
+  gap: 6px;
+  height: 44px;
+  padding: 0 22px;
   font: inherit;
   font-size: 13.5px;
   font-weight: 500;
@@ -258,7 +266,7 @@ select.input {
 
 /* Primary: auto width by default — add .btn--block for full-width */
 .btn--primary {
-  color: #fff;
+  color: var(--ui-accent-contrast);
   background: var(--ui-accent);
 }
 
@@ -281,14 +289,16 @@ select.input {
 .link {
   padding: 0;
   font: inherit;
-  color: var(--ui-accent);
+  color: var(--ui-text);
   background: none;
   border: 0;
   cursor: pointer;
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: var(--ui-line-strong);
+  text-underline-offset: 2px;
 }
 
-.link:hover { text-decoration: underline; }
+.link:hover { text-decoration-color: currentColor; }
 
 .download__hint {
   margin: 8px 0 0;
@@ -337,7 +347,10 @@ select.input {
     --ui-muted: #A39C8C;
     --ui-line: #2E2C28;
     --ui-line-strong: #46433C;
-    --ui-focus: rgba(120, 150, 130, 0.35);
+    --ui-accent: #E9E8E3;
+    --ui-accent-hover: #D3D1C8;
+    --ui-accent-contrast: #1A1A1A;
+    --ui-focus: rgba(233, 232, 227, 0.22);
   }
   :root:not([data-theme="light"]) .input:disabled,
   :root:not([data-theme="light"]) .btn--ghost:hover { background: #27251F; }
@@ -352,7 +365,10 @@ select.input {
   --ui-muted: #A39C8C;
   --ui-line: #2E2C28;
   --ui-line-strong: #46433C;
-  --ui-focus: rgba(120, 150, 130, 0.35);
+  --ui-accent: #E9E8E3;
+  --ui-accent-hover: #D3D1C8;
+  --ui-accent-contrast: #1A1A1A;
+  --ui-focus: rgba(233, 232, 227, 0.22);
 }
 
 /* ==========================================================================
@@ -603,7 +619,7 @@ select.input {
 
 .hero-card {
   background: linear-gradient(135deg, #2C3930 0%, #23291F 55%, #1A1A1A 100%);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
   padding: 36px 32px 26px;
   color: #fff;
   margin-bottom: 24px;
@@ -661,7 +677,7 @@ select.input {
   padding: 0;
   background: rgba(255,255,255,0.15);
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--ui-radius);
   color: #fff;
   cursor: pointer;
   transition: background 120ms;
@@ -708,7 +724,6 @@ select.input {
   padding: 0 20px;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 6px;
 }
 
 .dash-actions .btn svg {
@@ -749,7 +764,7 @@ select.input {
 .inv-list {
   background: var(--ui-bg);
   border: 1px solid var(--ui-line);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
   overflow: hidden;
 }
 
@@ -837,7 +852,7 @@ select.input {
   justify-content: space-between;
   gap: 16px;
   padding: 14px 18px;
-  border-radius: 10px;
+  border-radius: var(--ui-radius-lg);
   border: 1px solid;
   flex-wrap: wrap;
 }
@@ -906,7 +921,7 @@ select.input {
 .hub-section {
   background: var(--ui-bg);
   border: 1px solid var(--ui-line);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
   overflow: hidden;
   margin-bottom: 24px;
 }
@@ -942,6 +957,26 @@ select.input {
 
 .toolbar__search { flex: 1; min-width: 180px; }
 .toolbar__sort { width: auto; min-width: 160px; flex-shrink: 0; cursor: pointer; }
+
+/* Search / select fields with a leading icon */
+
+.search-field { position: relative; flex: 1; min-width: 180px; }
+.select-field { position: relative; flex-shrink: 0; }
+
+.search-field svg,
+.select-field svg {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: var(--ui-muted);
+  pointer-events: none;
+}
+
+.search-field .input,
+.select-field .input { padding-left: 42px; }
 
 /* ==========================================================================
    Filter tabs
@@ -984,8 +1019,8 @@ select.input {
 .filter-tab--all.filter-tab--active { color: var(--ui-text); border-color: var(--ui-text); }
 .filter-tab--all.filter-tab--active .filter-tab__count { background: var(--ui-text); color: var(--ui-bg); }
 
-.filter-tab--draft.filter-tab--active { color: #6B675C; border-color: #6B675C; }
-.filter-tab--draft.filter-tab--active .filter-tab__count { background: #6B675C; color: var(--ui-bg); }
+.filter-tab--draft.filter-tab--active { color: #6B6B6B; border-color: #6B6B6B; }
+.filter-tab--draft.filter-tab--active .filter-tab__count { background: #6B6B6B; color: var(--ui-bg); }
 
 .filter-tab--sent.filter-tab--active { color: #35507D; border-color: #35507D; }
 .filter-tab--sent.filter-tab--active .filter-tab__count { background: #35507D; color: var(--ui-bg); }
@@ -1013,7 +1048,7 @@ select.input {
 
 .inv-table-wrap {
   overflow-x: auto;
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
   border: 1px solid var(--ui-line);
   background: var(--ui-bg);
   -webkit-overflow-scrolling: touch;
@@ -1059,13 +1094,13 @@ select.input {
   white-space: nowrap;
 }
 
-.status-badge--draft  { background: #F1EFE9; color: #6B675C; }
+.status-badge--draft  { background: #EFEFEF; color: #6B6B6B; }
 .status-badge--sent   { background: #EAEEF3; color: #35507D; }
 .status-badge--paid   { background: #E9EDE9; color: #2C3930; }
 .status-badge--overdue { background: #F5E9E4; color: #9A4632; }
 
 /* Job status pipeline — grouped by meaning, not one hue per status */
-.status-badge--inquiry   { background: #F1EFE9; color: #6B675C; } /* not started, same as draft */
+.status-badge--inquiry   { background: #EFEFEF; color: #6B6B6B; } /* not started, same as draft */
 .status-badge--booked    { background: #EAEEF3; color: #35507D; } /* in motion, same as sent */
 .status-badge--confirmed { background: #EAEEF3; color: #35507D; }
 .status-badge--shot      { background: #E9EDE9; color: #2C3930; } /* work done, same as paid */
@@ -1094,7 +1129,7 @@ select.input {
 .client-form-card {
   background: var(--ui-bg);
   border: 1px solid var(--ui-line);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
   padding: 20px 24px 24px;
   margin-bottom: 20px;
 }
@@ -1127,7 +1162,7 @@ select.input {
 
 .modal-dialog {
   background: var(--ui-bg);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
   width: 100%;
   max-width: 560px;
   max-height: calc(100vh - 48px);
@@ -1160,7 +1195,7 @@ select.input {
 
 @media (max-width: 480px) {
   .modal-overlay { padding: 0; align-items: flex-end; }
-  .modal-dialog { max-width: none; max-height: 90vh; border-radius: 6px 6px 0 0; }
+  .modal-dialog { max-width: none; max-height: 90vh; border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 0 0; }
 }
 
 /* Empty state */
@@ -1171,7 +1206,7 @@ select.input {
   color: var(--ui-muted);
   background: var(--ui-bg);
   border: 1px solid var(--ui-line);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
 }
 
 .empty-state p { margin: 0 0 16px; font-size: 14px; }
@@ -1270,7 +1305,7 @@ select.input {
 .settings-card {
   background: var(--ui-bg);
   border: 1px solid var(--ui-line);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-lg);
   padding: 24px;
   margin-bottom: 20px;
 }
@@ -1336,14 +1371,16 @@ select.input {
   .hub-page__head { gap: 10px; }
 
   /* Tables: make them scroll */
-  .inv-table-wrap { border-radius: 6px; }
+  .inv-table-wrap { border-radius: 14px; }
   .inv-table th,
   .inv-table td { padding: 10px 12px; }
 
-  /* Toolbar stacks */
-  .toolbar { flex-direction: column; align-items: stretch; }
-  .toolbar__search { min-width: 0; }
-  .toolbar__sort { width: 100%; }
+  /* Toolbar: search takes its own full-width row, filter/sort pills stay
+     compact and wrap instead of stretching edge to edge */
+  .toolbar__search,
+  .search-field { flex: 1 1 100%; min-width: 0; }
+  .toolbar__sort,
+  .select-field { flex: 0 0 auto; width: auto; }
 
   /* Filter tabs scroll horizontally */
   .filter-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }

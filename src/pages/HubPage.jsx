@@ -8,10 +8,10 @@ import { formatShortDate, todayISO, addDays } from "../lib/dates.js";
 import { loadSettings } from "../lib/settings.js";
 
 const STATUS_LABEL = { draft: "Draft", sent: "Sent", paid: "Paid", overdue: "Overdue" };
-const AVATAR_COLORS = ["#2C3930", "#35507D", "#9A4632", "#6B675C", "#5B4636", "#4A5D52"];
+const AVATAR_COLORS = ["#2C3930", "#35507D", "#9A4632", "#6B6B6B", "#5B4636", "#4A5D52"];
 
 function avatarColor(name) {
-  if (!name) return "#948C7E";
+  if (!name) return "#9A9A9A";
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
@@ -163,7 +163,7 @@ export default function HubPage() {
         </section>
       )}
 
-      {/* Hero card */}
+      {/* Hero card — commented out for now, undecided on treatment.
       <div className="hero-card">
         <p className="hero-card__label">Outstanding balance</p>
         <div className="hero-card__amount-row">
@@ -187,6 +187,7 @@ export default function HubPage() {
           <span className="hero-card__footer-value">{formatCurrency(paid)}</span>
         </div>
       </div>
+      */}
 
       {/* Dashboard actions */}
       <div className="dash-actions">
