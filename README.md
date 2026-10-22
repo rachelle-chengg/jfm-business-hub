@@ -38,3 +38,10 @@ Chrome and Edge give the best result. In Firefox, turn off "Print headers and fo
 The original invoice uses Gotham SSm (Light, Medium, Bold), a licensed font.
 Montserrat from Google Fonts is a close geometric substitute. If you own Gotham,
 add `@font-face` rules for it and put it first in `--inv-font` in `invoice.css`.
+
+## Visual annotations
+
+Open `/invoices/new?annotate=1` on desktop to enable the Agentation toolbar.
+Click the toolbar, select an element, add your note, then copy the feedback
+and paste it into the coding chat. Normal URLs do not load the toolbar.
+Annotations remain local to the browser; automatic agent sync is not configured.

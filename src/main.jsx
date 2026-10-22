@@ -1,4 +1,5 @@
 import React from "react";
+import AnnotationTools from "./components/AnnotationTools.jsx";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout.jsx";
@@ -37,6 +38,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <AnnotationTools />
       </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>

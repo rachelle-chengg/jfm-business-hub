@@ -480,3 +480,5 @@
   .preview__scaler:last-of-type { break-after: auto; page-break-after: auto; }
   .sheet { position: relative; width: 8.5in; height: 11in; transform: none !important; }
 }
+
+@media print { agentation-toolbar, [data-agentation-portal], [data-feedback-toolbar] { display: none !important; } }
