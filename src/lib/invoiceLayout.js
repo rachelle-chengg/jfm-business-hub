@@ -11,21 +11,21 @@ export function invoiceOverflows(sheet) {
     client.scrollHeight > client.clientHeight + 1 ||
     business.getBoundingClientRect().bottom > client.getBoundingClientRect().top ||
     footer.scrollWidth > footer.clientWidth + 1 ||
-    bottom.scrollWidth > bottom.clientWidth + 1;
+    Boolean(bottom && bottom.scrollWidth > bottom.clientWidth + 1);
 }
 
 export async function prepareInvoiceExport() {
-  const sheet = document.getElementById('invoice-sheet');
-  if (!sheet) throw new Error('Invoice sheet element not found.');
+  const sheets = Array.from(document.querySelectorAll('[data-invoice-page]'));
+  if (!sheets.length) throw new Error('Invoice sheet element not found.');
   // The mobile editor hides the preview. Reveal it for measurement/capture.
   document.documentElement.classList.add('invoice-exporting');
   const restore = () => document.documentElement.classList.remove('invoice-exporting');
   try {
     if (document.fonts?.ready) await document.fonts.ready;
-    await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img => img.decode()));
+    await Promise.all(Array.from(document.querySelectorAll('[data-invoice-page] img')).map(img => img.decode()));
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    if (invoiceOverflows(sheet)) {
-      throw new Error('This invoice exceeds the one-page template. Shorten the text or reduce the line items before exporting.');
+    if (Array.from(document.querySelectorAll('[data-invoice-page]')).some(invoiceOverflows)) {
+      throw new Error('This invoice exceeds its page bounds. Enable additional pages in Page settings, or shorten oversized content before exporting.');
     }
     return restore;
   } catch (error) {

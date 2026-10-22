@@ -55,21 +55,25 @@ export async function generatePdfBlob() {
 
   const restoreLayout = await prepareInvoiceExport();
   try {
-    const canvas = await html2canvas(sheet, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: null,
-      // Capture the full-size sheet, independent of the mobile preview scale.
-      width: 816,
-      height: 1056,
-      onclone: (clonedDocument) => {
-        clonedDocument.getElementById("invoice-sheet").style.transform = "none";
-      },
-    });
-
-    const pdf = new jsPDF({ unit: "in", format: "letter", orientation: "portrait" });
-    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 8.5, 11);
+    const pdf = new jsPDF({ unit: "in", format: "letter", orientation: "portrait", compress: true });
+    const sheets = Array.from(document.querySelectorAll('[data-invoice-page]'));
+    for (const [index, sheet] of sheets.entries()) {
+      const canvas = await html2canvas(sheet, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: null,
+        width: 816,
+        height: 1056,
+        onclone: (clonedDocument) => {
+          clonedDocument.getElementById(sheet.id).style.transform = "none";
+        },
+      });
+      if (index > 0) pdf.addPage();
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 8.5, 11, undefined, "FAST");
+      canvas.width = 0;
+      canvas.height = 0;
+    }
     return pdf.output("blob");
   } finally {
     restoreLayout();

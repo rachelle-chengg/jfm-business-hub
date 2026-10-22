@@ -25,6 +25,7 @@ export function createInvoice({ invoiceNumber = "", templateId } = {}) {
   const template = getTemplate(templateId);
   return {
     invoiceNumber,
+    allowAdditionalPages: false,
     dateIssued,
     dueDate: addDays(dateIssued, DUE_DATE_OFFSET_DAYS),
     dueDateOverridden: false,

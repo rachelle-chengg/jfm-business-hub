@@ -32,6 +32,15 @@ export default function InvoiceForm({
       />
       <ClientFields client={invoice.client} onChange={onUpdateClient} />
       <LineItems items={invoice.items} onChange={onSetItems} />
+      <section className="form__section">
+        <h2 className="form__heading">Page settings</h2>
+        <label className="toggle">
+          <input type="checkbox" checked={Boolean(invoice.allowAdditionalPages)}
+            onChange={e => onUpdate({ allowAdditionalPages: e.target.checked })} />
+          <span>Allow additional pages</span>
+        </label>
+        <p className="field__hint">Add pages automatically when line items do not fit. Totals and payment details appear on the final page.</p>
+      </section>
       <TaxSettings tax={invoice.tax} onChange={onUpdateTax} />
       <AdjustmentSettings adjustment={adjustment} onChange={onUpdateAdjustment} />
     </div>

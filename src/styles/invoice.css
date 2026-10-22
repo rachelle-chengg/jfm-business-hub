@@ -458,3 +458,25 @@
 }
 .sheet__payment-terms h4,
 .sheet__payment-terms p { font-size: 12px; line-height: 17px; margin: 0; }
+
+/* Multi-page preview and isolated, unscaled layout measurement. */
+.invoice-measure { position: absolute; left: -100000px; top: 0; width: 816px; height: 1056px; visibility: hidden; pointer-events: none; }
+.sheet--measure { position: relative; transform: none; }
+.preview { height: auto; min-height: 100%; }
+.preview__pages { display: flex; flex-direction: column; gap: 24px; align-items: center; width: 100%; }
+.sheet__bottom--only { margin-top: 0; }
+.sheet__page-number { position: absolute; right: var(--inv-margin); top: 4.47in; font-size: 11px; line-height: 16px; }
+.preview__warning { position: static; width: 100%; }
+@media (max-width: 900px) { .preview { aspect-ratio: auto; } }
+@media print {
+  html, body, #root { height: auto; overflow: visible; }
+  .invoice-measure { display: none !important; }
+  .app { display: block !important; height: auto !important; }
+  .app .editor { display: none !important; }
+  .app .stage { height: auto; overflow: visible; padding: 0; }
+  .preview { display: block; height: auto; min-height: 0; }
+  .preview__pages { display: block; }
+  .preview__scaler { width: 8.5in !important; height: 11in !important; break-after: page; page-break-after: always; }
+  .preview__scaler:last-of-type { break-after: auto; page-break-after: auto; }
+  .sheet { position: relative; width: 8.5in; height: 11in; transform: none !important; }
+}

@@ -62,3 +62,13 @@ Line-item geometry uses `--inv-item-height`, `--inv-amount-width` and `--inv-cel
 Default payment copy is presented as “Invoice settlement”, with numbered payment methods, emphasized email, and separate late-payment terms. Custom template instructions retain their saved content. Phone and email links use tel/mailto URLs and inherit text color without underlines, including on hover.
 
 Refinement: payment methods are unnumbered, with one shared invoice-number reminder. The bottom grid uses 3.6in / 2.5in columns and a 0.4in gap. Late-payment terms occupy a full-width anchored strip 1.03in from the bottom, height 0.55in. Body ends 1.7in from the bottom to reserve clearance; custom terms are checked for overflow. The default interest label displays as “Late fee”; custom labels are retained.
+
+## Additional pages
+
+Each invoice has an opt-in “Allow additional pages” checkbox under Page settings. Older invoices and new invoices retain single-page mode by default. The value travels with drafts and saved invoice records.
+
+An inert off-screen copy measures actual row heights, table headings, and the settlement/totals block after fonts load. Whole line items are packed into letter-size pages. Header, client details, metadata, table headings, footer and page numbers repeat. Settlement, grand totals and late-payment terms appear once on the final page; if necessary, that page may contain only settlement and totals. An individual row too tall for a page is still flagged for shortening.
+
+The screen preview stacks pages vertically at a constant width-based scale. Native print uses real page breaks. Drive export captures each page separately at full resolution into a multi-page PDF. Both export paths validate all visible pages.
+
+Pagination unit checks: `node --test test/pagination.test.js`. Browser verification: 20 line items retained exactly once and in order; page setting survives reload; single-page mode restores its overflow warning; native and mobile Drive PDFs include all pages.
