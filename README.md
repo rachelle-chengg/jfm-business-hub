@@ -1,6 +1,6 @@
 # Jonathan Folk Media invoice generator
 
-**Live:** https://jfm-invoices.vercel.app
+**Live:** https://jfm-business-hub.vercel.app
 
 Invoice hub with dashboard, client management, PDF export, and Google Drive upload.
 
