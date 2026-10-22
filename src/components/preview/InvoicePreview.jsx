@@ -1,3 +1,4 @@
+import { invoiceOverflows } from "../../lib/invoiceLayout.js";
 import { useEffect, useRef, useState } from "react";
 import InvoiceHeader from "./InvoiceHeader.jsx";
 import ClientInfo from "./ClientInfo.jsx";
@@ -25,16 +26,8 @@ export default function InvoicePreview({ invoice, totals }) {
     let active = true;
     const check = () => {
       if (!active) return;
-      const body = sheet.querySelector(".sheet__body");
-      const client = sheet.querySelector(".sheet__client");
-      const business = sheet.querySelector(".sheet__business");
-      const footer = sheet.querySelector(".sheet__footer");
-      const bottom = sheet.querySelector(".sheet__bottom");
-      const tooLong = body.scrollHeight > body.clientHeight + 1 ||
-        client.scrollHeight > client.clientHeight + 1 ||
-        business.getBoundingClientRect().bottom > client.getBoundingClientRect().top ||
-        footer.scrollWidth > footer.clientWidth + 1 ||
-        bottom.scrollWidth > bottom.clientWidth + 1;
+      if (!sheet.getClientRects().length) return;
+      const tooLong = invoiceOverflows(sheet);
       sheet.dataset.overflow = String(tooLong);
       setOverflow(tooLong);
     };

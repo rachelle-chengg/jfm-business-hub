@@ -1,3 +1,5 @@
+import { prepareInvoiceExport } from "./invoiceLayout.js";
+
 /**
  * PDF export via the browser print engine.
  *
@@ -10,20 +12,19 @@
  * suggested filename in Chrome, Edge and Safari.
  */
 export async function exportInvoiceToPdf({ filename }) {
-  if (document.fonts?.ready) await document.fonts.ready;
-  // Let the preview's ResizeObserver validate the final font metrics.
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  if (document.querySelector('#invoice-sheet[data-overflow="true"]')) {
-    throw new Error("This invoice exceeds the one-page template. Shorten the text or reduce the line items before exporting.");
-  }
+  const restoreLayout = await prepareInvoiceExport();
   const previousTitle = document.title;
   document.title = filename.replace(/\.pdf$/i, "");
   if (document.fonts?.ready) await document.fonts.ready;
   const restore = () => {
+    restoreLayout();
     document.title = previousTitle;
     window.removeEventListener("afterprint", restore);
   };
   window.addEventListener("afterprint", restore);
-  window.print();
-  setTimeout(restore, 3000);
+  try {
+    window.print();
+  } finally {
+    restore();
+  }
 }

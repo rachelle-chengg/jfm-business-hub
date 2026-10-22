@@ -1,3 +1,4 @@
+import { prepareInvoiceExport } from "./invoiceLayout.js";
 /**
  * Google Drive — PDF generation + upload.
  *
@@ -52,16 +53,27 @@ export async function generatePdfBlob() {
   const sheet = document.getElementById("invoice-sheet");
   if (!sheet) throw new Error("Invoice sheet element not found.");
 
-  const canvas = await html2canvas(sheet, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
-    backgroundColor: null,
-  });
+  const restoreLayout = await prepareInvoiceExport();
+  try {
+    const canvas = await html2canvas(sheet, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: null,
+      // Capture the full-size sheet, independent of the mobile preview scale.
+      width: 816,
+      height: 1056,
+      onclone: (clonedDocument) => {
+        clonedDocument.getElementById("invoice-sheet").style.transform = "none";
+      },
+    });
 
-  const pdf = new jsPDF({ unit: "in", format: "letter", orientation: "portrait" });
-  pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 8.5, 11);
-  return pdf.output("blob");
+    const pdf = new jsPDF({ unit: "in", format: "letter", orientation: "portrait" });
+    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 8.5, 11);
+    return pdf.output("blob");
+  } finally {
+    restoreLayout();
+  }
 }
 
 /**

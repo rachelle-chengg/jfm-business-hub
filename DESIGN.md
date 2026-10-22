@@ -30,7 +30,7 @@ These colors deliberately preserve the supplied reference. The original font is 
 All dimensions refer to the unscaled page. The browser preview scales the whole document; it never reflows the invoice to the window width. Native print uses the same layout at scale 1, with no page margins.
 
 - Header: anchored 0.8in from the top, between the content margins. Title and business block left, existing transparent logo right.
-- Client: anchored at 2.97in, width 4.6in, available height 1.22in. Long words wrap.
+- Client: anchored at 2.97in, width 4.6in, available height 1.30in. Long words wrap.
 - Metadata: anchored at 2.34in, right-aligned to the content margin, width 1.12in.
 - Divider: anchored at 4.33in.
 - Body: begins at 4.66in and ends 1in above the page bottom. Table grows downward; settlement and totals follow at a 0.38in gap.
@@ -49,8 +49,10 @@ Fixed means fixed relative to the invoice sheet, not the browser viewport. Prese
 
 ## Content limits
 
-This is a one-page template. Do not shrink fonts to squeeze in extra content. Preview warns when body, client, business or footer content exceeds its region. The app's PDF export refuses an overflowing document instead of silently producing clipped content. Automatic multi-page invoices are a separate extension; browser print shortcuts bypass the app export guard.
+This is a one-page template. Do not shrink fonts to squeeze in extra content. Preview warns when body, client, business or footer content exceeds its region. Both native-print and Drive PDF export refuse an overflowing document instead of silently producing clipped content. Automatic multi-page invoices are a separate extension; browser print shortcuts bypass the app export guard.
 
 ## Verification
 
 Check the blank reference state, populated client, multiline descriptions, multiple rows, large amounts and over-capacity content. Header, divider, table start and footer coordinates must remain constant. Use print backgrounds and disable browser headers/footers when saving PDF.
+
+Mobile print explicitly reveals the preview even when the editor is selected. Drive capture renders the sheet at its full 816 × 1056 CSS pixels at 2× resolution, independently of preview scaling.
