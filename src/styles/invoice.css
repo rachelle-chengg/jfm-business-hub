@@ -15,10 +15,13 @@
   --inv-header-top: 0.8in;
   --inv-client-top: 2.97in;
   --inv-meta-top: 2.34in;
-  --inv-divider-top: 4.33in;
-  --inv-body-top: 4.66in;
+  --inv-divider-top: 4.45in;
+  --inv-body-top: 4.78in;
   --inv-body-bottom: 1in;
   --inv-footer-height: 0.775in;
+  --inv-item-height: 0.5in;
+  --inv-amount-width: 1.13in;
+  --inv-cell-padding: 0.08in 0.12in;
   --inv-rule: 1px solid var(--inv-ink);
   --inv-text: 15px;
   --inv-text-small: 12.5px;
@@ -232,7 +235,7 @@
 .sheet__table td {
   border: var(--inv-rule);
   text-align: center;
-  padding: 0.08in 0.12in;
+  padding: var(--inv-cell-padding);
 }
 
 .sheet__table th {
@@ -244,7 +247,7 @@
 }
 
 .sheet__table td {
-  height: 0.45in;
+  height: var(--inv-item-height);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -253,7 +256,7 @@
 
 .sheet__table th:last-child,
 .sheet__table td:last-child {
-  width: 1.13in;
+  width: var(--inv-amount-width);
   white-space: nowrap;
 }
 
@@ -333,7 +336,7 @@
   justify-content: center;
   min-width: 1.15in;
   height: 0.44in;
-  padding: 0.08in 0.12in;
+  padding: var(--inv-cell-padding);
   border: 1.5px solid var(--inv-ink);
   background: var(--inv-white);
   font-weight: 700;

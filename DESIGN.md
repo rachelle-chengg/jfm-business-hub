@@ -32,8 +32,8 @@ All dimensions refer to the unscaled page. The browser preview scales the whole 
 - Header: anchored 0.8in from the top, between the content margins. Title and business block left, existing transparent logo right.
 - Client: anchored at 2.97in, width 4.6in, available height 1.30in. Long words wrap.
 - Metadata: anchored at 2.34in, right-aligned to the content margin, width 1.12in.
-- Divider: anchored at 4.33in.
-- Body: begins at 4.66in and ends 1in above the page bottom. Table grows downward; settlement and totals follow at a 0.38in gap.
+- Divider: anchored at 4.45in.
+- Body: begins at 4.78in and ends 1in above the page bottom. Table grows downward; settlement and totals follow at a 0.38in gap.
 - Footer: anchored to the page bottom, height 0.775in. The olive polygon and footer never move with line-item count.
 
 Fixed means fixed relative to the invoice sheet, not the browser viewport. Preserve the two decorative corner polygons and the original logo asset.
@@ -43,7 +43,7 @@ Fixed means fixed relative to the invoice sheet, not the browser viewport. Prese
 `InvoiceHeader`: document title, business contact and logo.
 `ClientInfo`: issued heading and client contact lines.
 `InvoiceMeta`: invoice number, issue date, due date.
-`InvoiceTable`: semantic two-column table, 0.4in header, minimum 0.45in item rows, fixed 1.13in amount column. Descriptions wrap and preserve entered line breaks.
+`InvoiceTable`: semantic two-column table, 0.4in header, minimum 0.5in item rows, fixed 1.13in amount column. Descriptions wrap and preserve entered line breaks.
 `SettlementInfo` and `InvoiceTotals`: grid columns 3.75in / 2.6in with a 0.15in gap. Monetary values remain right aligned.
 `InvoiceFrame`: page decoration and bottom contact band.
 
@@ -56,3 +56,5 @@ This is a one-page template. Do not shrink fonts to squeeze in extra content. Pr
 Check the blank reference state, populated client, multiline descriptions, multiple rows, large amounts and over-capacity content. Header, divider, table start and footer coordinates must remain constant. Use print backgrounds and disable browser headers/footers when saving PDF.
 
 Mobile print explicitly reveals the preview even when the editor is selected. Drive capture renders the sheet at its full 816 × 1056 CSS pixels at 2× resolution, independently of preview scaling.
+
+Line-item geometry uses `--inv-item-height`, `--inv-amount-width` and `--inv-cell-padding`. All rows share the same minimum height and column boundaries; longer descriptions expand a row rather than clip. The client/details region has an additional 0.12in of clearance before the divider.
