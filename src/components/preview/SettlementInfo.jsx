@@ -16,7 +16,7 @@ export default function SettlementInfo({ settlement }) {
   }
   return (
     <section className="sheet__settlement sheet__settlement--structured">
-      <h3>How to pay</h3>
+      <h3>Invoice settlement</h3>
       <ol className="sheet__payment-methods">
         <li>
           <h4>E-transfer</h4>

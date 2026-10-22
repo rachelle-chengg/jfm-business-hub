@@ -59,4 +59,4 @@ Mobile print explicitly reveals the preview even when the editor is selected. Dr
 
 Line-item geometry uses `--inv-item-height`, `--inv-amount-width` and `--inv-cell-padding`. All rows share the same minimum height and column boundaries; longer descriptions expand a row rather than clip. The client/details region has an additional 0.12in of clearance before the divider.
 
-Default payment copy is presented as “How to pay”, with numbered payment methods, emphasized email, and separate late-payment terms. Custom template instructions retain their saved content. Phone and email links use tel/mailto URLs and inherit text color without underlines, including on hover.
+Default payment copy is presented as “Invoice settlement”, with numbered payment methods, emphasized email, and separate late-payment terms. Custom template instructions retain their saved content. Phone and email links use tel/mailto URLs and inherit text color without underlines, including on hover.
