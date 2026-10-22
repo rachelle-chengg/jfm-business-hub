@@ -1,19 +1,42 @@
-/** settlement.lines is stored as a newline-joined string (matches the
- *  Settings page's textarea), split back into an array here for rendering. */
+import { SETTLEMENT } from "../../config/business.js";
+import ContactText from "./ContactText.jsx";
+
+/** Keep custom template instructions intact; structure the original copy. */
 export default function SettlementInfo({ settlement }) {
   const lines = (settlement.lines || "").split("\n").filter(Boolean);
+  const original = lines.join("\n") === SETTLEMENT.lines.join("\n") && settlement.heading === SETTLEMENT.heading;
+  if (!original) {
+    return (
+      <section className="sheet__settlement">
+        <h3>{settlement.heading}</h3>
+        <p>{lines.map((line, i) => <span key={i}><ContactText>{line}</ContactText><br /></span>)}</p>
+        {settlement.note && <p className="sheet__settlement-note"><ContactText>{settlement.note}</ContactText></p>}
+      </section>
+    );
+  }
   return (
-    <section className="sheet__settlement">
-      <h3>{settlement.heading}</h3>
-      <p>
-        {lines.map((line, i) => (
-          <span key={i}>
-            {line}
-            <br />
-          </span>
-        ))}
-      </p>
-      {settlement.note ? <p className="sheet__settlement-note">{settlement.note}</p> : null}
+    <section className="sheet__settlement sheet__settlement--structured">
+      <h3>How to pay</h3>
+      <ol className="sheet__payment-methods">
+        <li>
+          <h4>E-transfer</h4>
+          <div className="sheet__payment-email"><ContactText>info@jonathanfolk.ca</ContactText></div>
+          <p>Include your invoice number in the message.</p>
+        </li>
+        <li>
+          <h4>Cheque</h4>
+          <div>Payable to <strong>Jonathan Folk Media</strong></div>
+          <p>Include your invoice number on the cheque.</p>
+        </li>
+        <li>
+          <h4>Credit card</h4>
+          <p>Contact us to request a payment link.</p>
+        </li>
+      </ol>
+      {settlement.note && <div className="sheet__payment-terms">
+        <h4>Late-payment terms</h4>
+        <p><ContactText>{settlement.note}</ContactText></p>
+      </div>}
     </section>
   );
 }

@@ -1,3 +1,5 @@
+import ContactText from "./ContactText.jsx";
+
 export default function ClientInfo({ client }) {
   const lines = [client.name, client.address1, client.address2, client.phone, client.email].filter(
     (l) => l && l.trim()
@@ -9,7 +11,7 @@ export default function ClientInfo({ client }) {
         {lines.length ? (
           lines.map((line, i) => (
             <span key={i}>
-              {line}
+              <ContactText>{line}</ContactText>
               <br />
             </span>
           ))

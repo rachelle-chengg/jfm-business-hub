@@ -20,7 +20,7 @@ The authoritative tokens live in `src/styles/invoice.css`, prefixed `--inv-`.
 | Settlement | 12.5px / 16px; heading weight 700 |
 | Table / footer labels | 15.5px, weight 700 |
 | Section heading | 22px, weight 700 |
-| Document title | 58px, weight 700 |
+| Document title | 46px, weight 700 |
 | Rules | 1px ink; balance outline 1.5px |
 
 These colors deliberately preserve the supplied reference. The original font is Gotham SSm, which is licensed and is not bundled. Montserrat is a substitute, so exact font matching requires licensed font files.
@@ -58,3 +58,5 @@ Check the blank reference state, populated client, multiline descriptions, multi
 Mobile print explicitly reveals the preview even when the editor is selected. Drive capture renders the sheet at its full 816 × 1056 CSS pixels at 2× resolution, independently of preview scaling.
 
 Line-item geometry uses `--inv-item-height`, `--inv-amount-width` and `--inv-cell-padding`. All rows share the same minimum height and column boundaries; longer descriptions expand a row rather than clip. The client/details region has an additional 0.12in of clearance before the divider.
+
+Default payment copy is presented as “How to pay”, with numbered payment methods, emphasized email, and separate late-payment terms. Custom template instructions retain their saved content. Phone and email links use tel/mailto URLs and inherit text color without underlines, including on hover.
