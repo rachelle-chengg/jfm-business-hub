@@ -10,6 +10,12 @@
  * suggested filename in Chrome, Edge and Safari.
  */
 export async function exportInvoiceToPdf({ filename }) {
+  if (document.fonts?.ready) await document.fonts.ready;
+  // Let the preview's ResizeObserver validate the final font metrics.
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  if (document.querySelector('#invoice-sheet[data-overflow="true"]')) {
+    throw new Error("This invoice exceeds the one-page template. Shorten the text or reduce the line items before exporting.");
+  }
   const previousTitle = document.title;
   document.title = filename.replace(/\.pdf$/i, "");
   if (document.fonts?.ready) await document.fonts.ready;

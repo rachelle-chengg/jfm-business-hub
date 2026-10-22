@@ -1,7 +1,7 @@
 /* ==========================================================================
    Invoice sheet. Laid out in physical inches on an 8.5 x 11 page so the
    on-screen preview and the printed PDF are the same document.
-   Reference: Kadium No. 4 invoice 25079 (InDesign, Gotham SSm).
+   Reference: user screenshot, October 21, 2026. See DESIGN.md.
    ========================================================================== */
 
 :root {
@@ -10,6 +10,22 @@
   --inv-ink: #1C1C1C;
   --inv-white: #FFFFFF;
   --inv-font: "Montserrat", "Gotham SSm", "Gotham", "Helvetica Neue", Arial, sans-serif;
+  --inv-page-width: 8.5in;
+  --inv-page-height: 11in;
+  --inv-header-top: 0.8in;
+  --inv-client-top: 2.97in;
+  --inv-meta-top: 2.34in;
+  --inv-divider-top: 4.33in;
+  --inv-body-top: 4.66in;
+  --inv-body-bottom: 1in;
+  --inv-footer-height: 0.775in;
+  --inv-rule: 1px solid var(--inv-ink);
+  --inv-text: 15px;
+  --inv-text-small: 12.5px;
+  --inv-text-label: 15.5px;
+  --inv-text-section: 22px;
+  --inv-text-title: 58px;
+  --inv-line-height: 19px;
   --inv-margin: 1in;
   --inv-content-width: 6.5in;
 }
@@ -32,16 +48,16 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 8.5in;
-  height: 11in;
+  width: var(--inv-page-width);
+  height: var(--inv-page-height);
   transform-origin: top left;
   overflow: hidden;
   background: var(--inv-paper);
   color: var(--inv-ink);
   font-family: var(--inv-font);
   font-weight: 300;
-  font-size: 15px;
-  line-height: 19px;
+  font-size: var(--inv-text);
+  line-height: var(--inv-line-height);
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
   padding: 0 var(--inv-margin);
@@ -60,8 +76,8 @@
 .sheet__corner {
   position: absolute;
   inset: 0;
-  width: 8.5in;
-  height: 11in;
+  width: var(--inv-page-width);
+  height: var(--inv-page-height);
   fill: var(--inv-olive);
   pointer-events: none;
 }
@@ -70,16 +86,16 @@
   position: absolute;
   left: 1.695in;
   right: 0;
-  top: 10.225in;
-  height: 0.775in;
+  bottom: 0;
+  height: var(--inv-footer-height);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.28in;
   padding-right: 0.5in;
   font-weight: 700;
-  font-size: 15.5px;
-  color: #fff;
+  font-size: var(--inv-text-label);
+  color: var(--inv-white);
 }
 
 .sheet__footer-item {
@@ -97,17 +113,19 @@
 /* Header ------------------------------------------------------------------ */
 
 .sheet__header {
-  position: relative;
+  position: absolute;
+  top: var(--inv-header-top);
+  left: var(--inv-margin);
+  right: var(--inv-margin);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding-top: 0.8in;
 }
 
 .sheet__title {
   margin: 0.12in 0 0;
   font-weight: 700;
-  font-size: 58px;
+  font-size: var(--inv-text-title);
   line-height: 1;
   letter-spacing: 0.01em;
 }
@@ -131,16 +149,27 @@
 /* Client + meta ----------------------------------------------------------- */
 
 .sheet__client {
-  position: relative;
-  margin-top: 0.37in;
-  max-width: 4.6in;
-  min-height: 1.42in; /* keeps the table at 4.64in whether the client has 2 or 5 lines */
+  position: absolute;
+  top: var(--inv-client-top);
+  left: var(--inv-margin);
+  width: 4.6in;
+  height: 1.22in;
 }
+
+.sheet__client-lines,
+.sheet__business {
+  overflow-wrap: anywhere;
+}
+
+.sheet__business {
+  max-width: 4.6in;
+}
+
 
 .sheet__issued {
   margin: 0 0 0.07in;
   font-weight: 700;
-  font-size: 22px;
+  font-size: var(--inv-text-section);
   line-height: 1;
 }
 
@@ -150,7 +179,7 @@
 
 .sheet__meta {
   position: absolute;
-  top: 2.34in;
+  top: var(--inv-meta-top);
   right: var(--inv-margin);
   width: 1.12in;
   margin: 0;
@@ -175,7 +204,7 @@
 
 .sheet__divider {
   position: absolute;
-  top: 4.33in;
+  top: var(--inv-divider-top);
   left: var(--inv-margin);
   width: var(--inv-content-width);
   margin: 0;
@@ -183,9 +212,17 @@
   border-top: 1px solid var(--inv-ink);
 }
 
+.sheet__body {
+  position: absolute;
+  top: var(--inv-body-top);
+  bottom: var(--inv-body-bottom);
+  left: var(--inv-margin);
+  width: var(--inv-content-width);
+}
+
 .sheet__table {
-  position: relative;
-  margin-top: 0.27in; /* sits at 4.64in with the reference client block */
+  table-layout: fixed;
+  margin: 0;
   width: var(--inv-content-width);
   border-collapse: collapse;
   background: var(--inv-white);
@@ -193,9 +230,9 @@
 
 .sheet__table th,
 .sheet__table td {
-  border: 1px solid var(--inv-ink);
+  border: var(--inv-rule);
   text-align: center;
-  padding: 0 0.12in;
+  padding: 0.08in 0.12in;
 }
 
 .sheet__table th {
@@ -203,12 +240,16 @@
   background: var(--inv-olive);
   color: var(--inv-white);
   font-weight: 700;
-  font-size: 15.5px;
+  font-size: var(--inv-text-label);
 }
 
 .sheet__table td {
   height: 0.45in;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
+
+.sheet__table tr { break-inside: avoid; }
 
 .sheet__table th:last-child,
 .sheet__table td:last-child {
@@ -220,21 +261,23 @@
 
 .sheet__bottom {
   position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 3.75in) minmax(0, 2.6in);
+  column-gap: 0.15in;
+  align-items: start;
   margin-top: 0.38in;
 }
 
 .sheet__settlement {
-  width: 3.75in;
-  font-size: 12.5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--inv-text-small);
   line-height: 16px;
 }
 
 .sheet__settlement h3 {
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--inv-text-small);
   font-weight: 700;
 }
 
@@ -247,7 +290,7 @@
 }
 
 .sheet__totals {
-  width: 2.6in;
+  min-width: 0;
   padding-top: 0.02in;
   white-space: nowrap;
 }
@@ -287,7 +330,7 @@
   justify-content: center;
   min-width: 1.15in;
   height: 0.44in;
-  padding: 0 0.12in;
+  padding: 0.08in 0.12in;
   border: 1.5px solid var(--inv-ink);
   background: var(--inv-white);
   font-weight: 700;
@@ -305,7 +348,7 @@
   html,
   body,
   #root {
-    height: 11in;
+    height: var(--inv-page-height);
     overflow: hidden;
   }
 
@@ -354,3 +397,21 @@
 .sheet__footer-link:hover {
   text-decoration: none;
 }
+
+/* Status sits outside the printed page, never over invoice content. */
+.preview { position: relative; }
+.preview__warning {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  z-index: 2;
+  margin: 0;
+  padding: 12px 16px;
+  background: #fff3d6;
+  color: #573b10;
+  border: 1px solid #b78b36;
+  border-radius: 8px;
+  font: 500 13px/1.5 system-ui, sans-serif;
+}
+@media print { .preview__warning { display: none; } }

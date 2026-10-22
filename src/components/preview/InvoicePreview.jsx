@@ -17,6 +17,33 @@ const SHEET_HEIGHT_PX = 1056; // 11in
 export default function InvoicePreview({ invoice, totals }) {
   const hostRef = useRef(null);
   const [scale, setScale] = useState(1);
+  const [overflow, setOverflow] = useState(false);
+
+  useEffect(() => {
+    const sheet = hostRef.current?.querySelector(".sheet");
+    if (!sheet) return;
+    let active = true;
+    const check = () => {
+      if (!active) return;
+      const body = sheet.querySelector(".sheet__body");
+      const client = sheet.querySelector(".sheet__client");
+      const business = sheet.querySelector(".sheet__business");
+      const footer = sheet.querySelector(".sheet__footer");
+      const bottom = sheet.querySelector(".sheet__bottom");
+      const tooLong = body.scrollHeight > body.clientHeight + 1 ||
+        client.scrollHeight > client.clientHeight + 1 ||
+        business.getBoundingClientRect().bottom > client.getBoundingClientRect().top ||
+        footer.scrollWidth > footer.clientWidth + 1 ||
+        bottom.scrollWidth > bottom.clientWidth + 1;
+      sheet.dataset.overflow = String(tooLong);
+      setOverflow(tooLong);
+    };
+    const observer = new ResizeObserver(check);
+    sheet.querySelectorAll(".sheet__body, .sheet__table, .sheet__bottom, .sheet__client, .sheet__business, .sheet__footer").forEach(node => observer.observe(node));
+    check();
+    document.fonts?.ready.then(check);
+    return () => { active = false; observer.disconnect(); };
+  }, [invoice, totals]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -43,13 +70,18 @@ export default function InvoicePreview({ invoice, totals }) {
           <ClientInfo client={invoice.client} />
           <InvoiceMeta invoice={invoice} />
           <hr className="sheet__divider" />
-          <InvoiceTable items={invoice.items} />
-          <div className="sheet__bottom">
-            <SettlementInfo settlement={invoice.settlementInfo} />
-            <InvoiceTotals totals={totals} tax={invoice.tax} />
-          </div>
+          <main className="sheet__body">
+            <InvoiceTable items={invoice.items} />
+            <div className="sheet__bottom">
+              <SettlementInfo settlement={invoice.settlementInfo} />
+              <InvoiceTotals totals={totals} tax={invoice.tax} />
+            </div>
+          </main>
         </div>
       </div>
+      {overflow && <p className="preview__warning" role="alert">
+        This invoice exceeds the one-page template. Shorten the text or reduce the line items before exporting.
+      </p>}
     </div>
   );
 }

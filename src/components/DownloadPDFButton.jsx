@@ -9,14 +9,17 @@ import { suggestedFilename } from "../lib/invoice.js";
 export default function DownloadPDFButton({ invoice, exportPdf = exportInvoiceToPdf }) {
   const [state, setState] = useState("idle"); // idle | working | error
   const filename = suggestedFilename(invoice);
+  const [error, setError] = useState("");
 
   const handleClick = async () => {
     setState("working");
+    setError("");
     try {
       await exportPdf({ filename, invoice });
       setState("idle");
     } catch (err) {
       console.error(err);
+      setError(err.message || "The PDF could not be created. Try again.");
       setState("error");
     }
   };
@@ -27,7 +30,7 @@ export default function DownloadPDFButton({ invoice, exportPdf = exportInvoiceTo
         {state === "working" ? "Preparing PDF\u2026" : "Export"}
       </button>
       {state === "error" && (
-        <p className="download__hint">The PDF could not be created. Try again.</p>
+        <p className="download__hint">{error}</p>
       )}
     </div>
   );
