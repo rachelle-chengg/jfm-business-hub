@@ -60,3 +60,5 @@ Mobile print explicitly reveals the preview even when the editor is selected. Dr
 Line-item geometry uses `--inv-item-height`, `--inv-amount-width` and `--inv-cell-padding`. All rows share the same minimum height and column boundaries; longer descriptions expand a row rather than clip. The client/details region has an additional 0.12in of clearance before the divider.
 
 Default payment copy is presented as “Invoice settlement”, with numbered payment methods, emphasized email, and separate late-payment terms. Custom template instructions retain their saved content. Phone and email links use tel/mailto URLs and inherit text color without underlines, including on hover.
+
+Refinement: payment methods are unnumbered, with one shared invoice-number reminder. The bottom grid uses 3.6in / 2.5in columns and a 0.4in gap. Late-payment terms occupy a full-width anchored strip 1.03in from the bottom, height 0.55in. Body ends 1.7in from the bottom to reserve clearance; custom terms are checked for overflow. The default interest label displays as “Late fee”; custom labels are retained.

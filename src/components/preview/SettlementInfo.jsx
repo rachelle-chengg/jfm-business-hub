@@ -10,33 +10,35 @@ export default function SettlementInfo({ settlement }) {
       <section className="sheet__settlement">
         <h3>{settlement.heading}</h3>
         <p>{lines.map((line, i) => <span key={i}><ContactText>{line}</ContactText><br /></span>)}</p>
-        {settlement.note && <p className="sheet__settlement-note"><ContactText>{settlement.note}</ContactText></p>}
       </section>
     );
   }
   return (
     <section className="sheet__settlement sheet__settlement--structured">
       <h3>Invoice settlement</h3>
-      <ol className="sheet__payment-methods">
+      <ul className="sheet__payment-methods">
         <li>
           <h4>E-transfer</h4>
           <div className="sheet__payment-email"><ContactText>info@jonathanfolk.ca</ContactText></div>
-          <p>Include your invoice number in the message.</p>
         </li>
         <li>
           <h4>Cheque</h4>
           <div>Payable to <strong>Jonathan Folk Media</strong></div>
-          <p>Include your invoice number on the cheque.</p>
         </li>
         <li>
           <h4>Credit card</h4>
           <p>Contact us to request a payment link.</p>
         </li>
-      </ol>
-      {settlement.note && <div className="sheet__payment-terms">
-        <h4>Late-payment terms</h4>
-        <p><ContactText>{settlement.note}</ContactText></p>
-      </div>}
+      </ul>
+      <p className="sheet__payment-reference">Include your invoice number with payment.</p>
     </section>
   );
+}
+
+export function SettlementTerms({ note }) {
+  if (!note) return null;
+  return <aside className="sheet__payment-terms">
+    <h4>Late-payment terms</h4>
+    <p><ContactText>{note}</ContactText></p>
+  </aside>;
 }

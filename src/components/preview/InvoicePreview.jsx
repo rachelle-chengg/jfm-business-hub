@@ -4,7 +4,7 @@ import InvoiceHeader from "./InvoiceHeader.jsx";
 import ClientInfo from "./ClientInfo.jsx";
 import InvoiceMeta from "./InvoiceMeta.jsx";
 import InvoiceTable from "./InvoiceTable.jsx";
-import SettlementInfo from "./SettlementInfo.jsx";
+import SettlementInfo, { SettlementTerms } from "./SettlementInfo.jsx";
 import InvoiceTotals from "./InvoiceTotals.jsx";
 import InvoiceFrame from "./InvoiceFrame.jsx";
 
@@ -32,7 +32,7 @@ export default function InvoicePreview({ invoice, totals }) {
       setOverflow(tooLong);
     };
     const observer = new ResizeObserver(check);
-    sheet.querySelectorAll(".sheet__body, .sheet__table, .sheet__bottom, .sheet__client, .sheet__business, .sheet__footer").forEach(node => observer.observe(node));
+    sheet.querySelectorAll(".sheet__body, .sheet__table, .sheet__bottom, .sheet__client, .sheet__business, .sheet__footer, .sheet__payment-terms").forEach(node => observer.observe(node));
     check();
     document.fonts?.ready.then(check);
     return () => { active = false; observer.disconnect(); };
@@ -70,6 +70,7 @@ export default function InvoicePreview({ invoice, totals }) {
               <InvoiceTotals totals={totals} tax={invoice.tax} />
             </div>
           </main>
+          <SettlementTerms note={invoice.settlementInfo.note} />
         </div>
       </div>
       {overflow && <p className="preview__warning" role="alert">

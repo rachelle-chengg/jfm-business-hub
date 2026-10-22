@@ -5,7 +5,8 @@ export function invoiceOverflows(sheet) {
   const business = sheet.querySelector('.sheet__business');
   const footer = sheet.querySelector('.sheet__footer');
   const bottom = sheet.querySelector('.sheet__bottom');
-  return body.scrollHeight > body.clientHeight + 1 ||
+  const terms = sheet.querySelector('.sheet__payment-terms');
+  return (terms && terms.scrollHeight > terms.clientHeight + 1) || body.scrollHeight > body.clientHeight + 1 ||
     body.scrollWidth > body.clientWidth + 1 ||
     client.scrollHeight > client.clientHeight + 1 ||
     business.getBoundingClientRect().bottom > client.getBoundingClientRect().top ||

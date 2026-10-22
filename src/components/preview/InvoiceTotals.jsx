@@ -26,7 +26,7 @@ export default function InvoiceTotals({ totals, tax }) {
 
       {totals.interestAmount > 0 && (
         <div className="sheet__totals-row">
-          <span>{totals.interestLabel}</span>
+          <span>{totals.interestLabel === "Interest / Late Fee" ? "Late fee" : totals.interestLabel}</span>
           <span>{formatCurrency(totals.interestAmount)}</span>
         </div>
       )}
